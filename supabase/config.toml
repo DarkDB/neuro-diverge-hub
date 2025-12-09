@@ -1,0 +1,10 @@
+project_id = "ghtcnebhrxyrxepufmed"
+
+[functions.teaser]
+verify_jwt = false
+
+[functions.full-analysis]
+verify_jwt = false
+
+[functions.test-analyzer]
+verify_jwt = false
