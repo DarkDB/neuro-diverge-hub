@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Compass, Lock, Sparkles, FileText, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { Compass, Lock, Sparkles, FileText, Mail, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { ContentBlock } from '@/components/ui/ContentBlock';
@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const preguntas = [
   "¿Cómo describirías tu relación con el tiempo y la gestión de tareas diarias?",
@@ -27,6 +28,7 @@ export default function Autodescubrimiento() {
   const [respuestas, setRespuestas] = useState<string[]>(Array(preguntas.length).fill(''));
   const [email, setEmail] = useState('');
   const [teaser, setTeaser] = useState('');
+  const [fullAnalysis, setFullAnalysis] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -48,19 +50,36 @@ export default function Autodescubrimiento() {
 
     setIsLoading(true);
     
-    // Simular llamada a API para el teaser
-    setTimeout(() => {
-      setTeaser(
-        `Tu forma de describir tu relación con el tiempo revela patrones fascinantes que podrían 
-        conectar con características de procesamiento neurodivergente. La manera en que experimentas 
-        la gestión de tareas sugiere un estilo cognitivo único que merece una exploración más profunda. 
-        Cada respuesta que has compartido contiene pistas valiosas sobre cómo funciona tu mente de 
-        formas que quizás nunca has considerado. Para descubrir tu perfil completo y entender qué 
-        significan estos patrones para ti, te invitamos a continuar con el análisis detallado.`
-      );
-      setIsLoading(false);
+    try {
+      console.log('Calling teaser function...');
+      const { data, error } = await supabase.functions.invoke('teaser', {
+        body: {
+          pregunta: preguntas[0],
+          respuesta: respuestas[0],
+        },
+      });
+
+      if (error) {
+        console.error('Teaser error:', error);
+        throw new Error(error.message || 'Error al generar el análisis');
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      setTeaser(data.teaser);
       setStep('teaser');
-    }, 2000);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'No se pudo generar el análisis. Inténtalo de nuevo.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePayment = async () => {
@@ -73,10 +92,58 @@ export default function Autodescubrimiento() {
       return;
     }
 
-    toast({
-      title: 'Función en desarrollo',
-      description: 'La integración de pagos con Stripe estará disponible próximamente.',
-    });
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        title: 'Email inválido',
+        description: 'Por favor, introduce un email válido.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Por ahora, simulamos el pago y generamos el análisis completo
+      // TODO: Integrar Stripe para pagos reales
+      
+      console.log('Calling full-analysis function...');
+      const { data, error } = await supabase.functions.invoke('full-analysis', {
+        body: {
+          preguntas,
+          respuestas,
+          email,
+        },
+      });
+
+      if (error) {
+        console.error('Full analysis error:', error);
+        throw new Error(error.message || 'Error al generar el análisis');
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      setFullAnalysis(data.analysis);
+      setStep('complete');
+      
+      toast({
+        title: '¡Análisis completado!',
+        description: 'Tu informe ha sido generado exitosamente.',
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'No se pudo generar el análisis. Inténtalo de nuevo.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -87,7 +154,7 @@ export default function Autodescubrimiento() {
           <div className="max-w-3xl mx-auto text-center animate-slide-up">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
               <Compass className="w-4 h-4" />
-              <span>Herramienta Interactiva</span>
+              <span>Herramienta Interactiva con IA</span>
             </div>
             <SectionTitle
               as="h1"
@@ -204,8 +271,17 @@ export default function Autodescubrimiento() {
                   disabled={isLoading}
                   className="gap-2"
                 >
-                  {isLoading ? 'Analizando...' : 'Obtener Análisis'}
-                  <Sparkles className="w-4 h-4" />
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Analizando...
+                    </>
+                  ) : (
+                    <>
+                      Obtener Análisis
+                      <Sparkles className="w-4 h-4" />
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
@@ -236,7 +312,7 @@ export default function Autodescubrimiento() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <FileText className="w-4 h-4 text-primary" />
-                        <span>Análisis detallado en PDF</span>
+                        <span>Análisis detallado</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Mail className="w-4 h-4 text-primary" />
@@ -256,10 +332,26 @@ export default function Autodescubrimiento() {
                         onChange={(e) => setEmail(e.target.value)}
                       />
                     </div>
-                    <Button onClick={handlePayment} className="w-full gap-2">
-                      Pagar 5€ y Desbloquear
-                      <ArrowRight className="w-4 h-4" />
+                    <Button 
+                      onClick={handlePayment} 
+                      disabled={isLoading}
+                      className="w-full gap-2"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Generando análisis...
+                        </>
+                      ) : (
+                        <>
+                          Obtener Análisis Completo
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
                     </Button>
+                    <p className="text-xs text-muted-foreground">
+                      * Pago con Stripe próximamente. Por ahora, demo gratuita.
+                    </p>
                   </div>
                 </div>
               </ContentBlock>
@@ -267,6 +359,51 @@ export default function Autodescubrimiento() {
               <div className="text-center">
                 <Button variant="ghost" onClick={() => setStep('questionnaire')}>
                   Volver al cuestionario
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Complete Step */}
+          {step === 'complete' && (
+            <div className="space-y-8 animate-fade-in">
+              <ContentBlock variant="success">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-success" />
+                  <h2 className="font-heading font-semibold text-xl">Tu Informe Completo</h2>
+                </div>
+              </ContentBlock>
+
+              <ContentBlock>
+                <div className="prose prose-sm max-w-none text-foreground">
+                  {fullAnalysis.split('\n').map((paragraph, index) => (
+                    paragraph.trim() && (
+                      <p key={index} className="mb-4 leading-relaxed">
+                        {paragraph.startsWith('**') && paragraph.endsWith('**') ? (
+                          <strong>{paragraph.replace(/\*\*/g, '')}</strong>
+                        ) : paragraph.startsWith('##') ? (
+                          <strong className="text-lg block mt-6 mb-2">{paragraph.replace(/##/g, '').trim()}</strong>
+                        ) : (
+                          paragraph
+                        )}
+                      </p>
+                    )
+                  ))}
+                </div>
+              </ContentBlock>
+
+              <div className="text-center space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Informe enviado a: <strong>{email}</strong>
+                </p>
+                <Button variant="outline" onClick={() => {
+                  setStep('intro');
+                  setRespuestas(Array(preguntas.length).fill(''));
+                  setTeaser('');
+                  setFullAnalysis('');
+                  setEmail('');
+                }}>
+                  Realizar nuevo cuestionario
                 </Button>
               </div>
             </div>
