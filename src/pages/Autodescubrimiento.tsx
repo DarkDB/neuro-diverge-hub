@@ -60,6 +60,7 @@ export default function Autodescubrimiento() {
   // Profile data
   const [edad, setEdad] = useState('');
   const [genero, setGenero] = useState('');
+  const [destinatario, setDestinatario] = useState('');
   const [email, setEmail] = useState('');
 
   // Phase 1 data
@@ -81,10 +82,10 @@ export default function Autodescubrimiento() {
   };
 
   const handleSubmitProfile = async () => {
-    if (!edad || !genero) {
+    if (!edad || !genero || !destinatario) {
       toast({
         title: 'Datos requeridos',
-        description: 'Por favor, completa la edad y el género.',
+        description: 'Por favor, completa todos los campos del perfil.',
         variant: 'destructive',
       });
       return;
@@ -95,7 +96,7 @@ export default function Autodescubrimiento() {
     try {
       console.log('Calling screening-phase1 function...');
       const { data, error } = await supabase.functions.invoke('screening-phase1', {
-        body: { edad, genero },
+        body: { edad, genero, destinatario },
       });
 
       if (error) {
@@ -275,6 +276,7 @@ export default function Autodescubrimiento() {
     setStep('intro');
     setEdad('');
     setGenero('');
+    setDestinatario('');
     setEmail('');
     setPhase1Intro('');
     setPhase1Questions([]);
@@ -457,6 +459,26 @@ export default function Autodescubrimiento() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="destinatario" className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      ¿Para quién es esta evaluación?
+                    </Label>
+                    <Select value={destinatario} onValueChange={setDestinatario}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona el destinatario" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Para mí mismo/a">Para mí mismo/a</SelectItem>
+                        <SelectItem value="Para mi hijo/a">Para mi hijo/a</SelectItem>
+                        <SelectItem value="Para un familiar">Para un familiar</SelectItem>
+                        <SelectItem value="Para un amigo/a">Para un amigo/a</SelectItem>
+                        <SelectItem value="Para un alumno/a">Para un alumno/a</SelectItem>
+                        <SelectItem value="Otro">Otro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </ContentBlock>
 
@@ -466,7 +488,7 @@ export default function Autodescubrimiento() {
                 </Button>
                 <Button 
                   onClick={handleSubmitProfile} 
-                  disabled={isLoading || !edad || !genero}
+                  disabled={isLoading || !edad || !genero || !destinatario}
                   className="gap-2"
                 >
                   {isLoading ? (
