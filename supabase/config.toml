@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.screening-phase3]
 verify_jwt = false
+
+[functions.screening-teaser]
+verify_jwt = false
