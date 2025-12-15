@@ -102,7 +102,7 @@ Genera el análisis preliminar y las preguntas de profundización para la Fase 2
           { role: "user", content: userPrompt },
         ],
         temperature: 0.7,
-        max_tokens: 3000,
+        max_tokens: 5000,
       }),
     });
 
