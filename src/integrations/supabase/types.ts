@@ -14,7 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      screening_sessions: {
+        Row: {
+          analisis_preliminar: Json | null
+          completed_at: string | null
+          created_at: string
+          destinatario: string
+          edad: string
+          fase1_preguntas: Json | null
+          fase1_respuestas: Json | null
+          fase2_preguntas: Json | null
+          fase2_respuestas: Json | null
+          genero: string
+          id: string
+          informe_final: Json | null
+          paid: boolean
+          status: string
+          teaser_data: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analisis_preliminar?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          destinatario: string
+          edad: string
+          fase1_preguntas?: Json | null
+          fase1_respuestas?: Json | null
+          fase2_preguntas?: Json | null
+          fase2_respuestas?: Json | null
+          genero: string
+          id?: string
+          informe_final?: Json | null
+          paid?: boolean
+          status?: string
+          teaser_data?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analisis_preliminar?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          destinatario?: string
+          edad?: string
+          fase1_preguntas?: Json | null
+          fase1_respuestas?: Json | null
+          fase2_preguntas?: Json | null
+          fase2_respuestas?: Json | null
+          genero?: string
+          id?: string
+          informe_final?: Json | null
+          paid?: boolean
+          status?: string
+          teaser_data?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

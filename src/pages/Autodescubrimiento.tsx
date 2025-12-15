@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Compass, Lock, Sparkles, FileText, Mail, ArrowRight, AlertCircle, Loader2, User, Calendar, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Compass, Lock, Sparkles, FileText, Mail, ArrowRight, AlertCircle, Loader2, User, Calendar, CheckCircle2, LogIn } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { ContentBlock } from '@/components/ui/ContentBlock';
@@ -9,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useScreeningSession } from '@/hooks/useScreeningSession';
 import { supabase } from '@/integrations/supabase/client';
 
 type Step = 'intro' | 'profile' | 'phase1' | 'phase1-teaser' | 'phase1-payment' | 'phase2' | 'phase2-questions' | 'phase3' | 'complete';
@@ -53,9 +56,12 @@ interface InformeFinal {
 }
 
 export default function Autodescubrimiento() {
+  const navigate = useNavigate();
   const [step, setStep] = useState<Step>('intro');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user, loading: authLoading } = useAuth();
+  const { createSession, savePhase1, savePhase2, completeSession, resetSession, isSaving } = useScreeningSession();
 
   // Profile data
   const [edad, setEdad] = useState('');
@@ -85,7 +91,22 @@ export default function Autodescubrimiento() {
   // Phase 3 data
   const [informeFinal, setInformeFinal] = useState<InformeFinal | null>(null);
 
+  // Prefill email from user if logged in
+  useEffect(() => {
+    if (user?.email) {
+      setEmail(user.email);
+    }
+  }, [user]);
+
   const handleStartProfile = () => {
+    if (!user) {
+      toast({
+        title: 'Inicia sesión',
+        description: 'Necesitas una cuenta para guardar tu progreso.',
+      });
+      navigate('/auth');
+      return;
+    }
     setStep('profile');
   };
 
@@ -102,6 +123,12 @@ export default function Autodescubrimiento() {
     setIsLoading(true);
 
     try {
+      // Create session in database
+      const newSessionId = await createSession({ edad, genero, destinatario });
+      if (!newSessionId) {
+        throw new Error('No se pudo crear la sesión');
+      }
+
       console.log('Calling screening-phase1 function...');
       const { data, error } = await supabase.functions.invoke('screening-phase1', {
         body: { edad, genero, destinatario },
@@ -171,6 +198,9 @@ export default function Autodescubrimiento() {
       if (data?.error) {
         throw new Error(data.error);
       }
+
+      // Save phase 1 data to database
+      await savePhase1(phase1Questions, historialRespuestas, data);
 
       setTeaserData(data);
       setStep('phase1-teaser');
@@ -277,6 +307,11 @@ export default function Autodescubrimiento() {
         respuesta: phase2Answers[i],
       }));
 
+      // Save phase 2 data to database
+      if (analisisPreliminar) {
+        await savePhase2(phase2Questions, historialFase2, analisisPreliminar as unknown as import("@/integrations/supabase/types").Json);
+      }
+
       console.log('Calling screening-phase3 function...');
       const { data, error } = await supabase.functions.invoke('screening-phase3', {
         body: { 
@@ -297,6 +332,9 @@ export default function Autodescubrimiento() {
         throw new Error(data.error);
       }
 
+      // Save final report to database
+      await completeSession(data);
+
       setInformeFinal(data);
       setStep('complete');
 
@@ -316,12 +354,13 @@ export default function Autodescubrimiento() {
     }
   };
 
-  const resetProcess = () => {
+  const resetProcessHandler = () => {
+    resetSession();
     setStep('intro');
     setEdad('');
     setGenero('');
     setDestinatario('');
-    setEmail('');
+    if (!user?.email) setEmail('');
     setPhase1Intro('');
     setPhase1Questions([]);
     setPhase1Answers([]);
@@ -992,7 +1031,7 @@ export default function Autodescubrimiento() {
                 <p className="text-sm text-muted-foreground">
                   Informe generado para: <strong>{email}</strong>
                 </p>
-                <Button variant="outline" onClick={resetProcess}>
+                <Button variant="outline" onClick={resetProcessHandler}>
                   Realizar nuevo cribado
                 </Button>
               </div>
