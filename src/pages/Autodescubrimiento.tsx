@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-type Step = 'intro' | 'profile' | 'phase1' | 'phase1-payment' | 'phase2' | 'phase2-questions' | 'phase3' | 'complete';
+type Step = 'intro' | 'profile' | 'phase1' | 'phase1-teaser' | 'phase1-payment' | 'phase2' | 'phase2-questions' | 'phase3' | 'complete';
 
 interface RespuestaHistorial {
   pregunta: string;
@@ -68,6 +68,14 @@ export default function Autodescubrimiento() {
   const [phase1Questions, setPhase1Questions] = useState<string[]>([]);
   const [phase1Answers, setPhase1Answers] = useState<string[]>([]);
   const [phase1Disclaimer, setPhase1Disclaimer] = useState('');
+
+  // Teaser data
+  const [teaserData, setTeaserData] = useState<{
+    titulo: string;
+    resumen: string;
+    patrones: string[];
+    cierre: string;
+  } | null>(null);
 
   // Phase 2 data
   const [analisisPreliminar, setAnalisisPreliminar] = useState<AnalisisPreliminar | null>(null);
@@ -131,7 +139,7 @@ export default function Autodescubrimiento() {
     setPhase1Answers(newAnswers);
   };
 
-  const handleSubmitPhase1 = () => {
+  const handleSubmitPhase1 = async () => {
     const unanswered = phase1Answers.filter(a => !a.trim()).length;
     if (unanswered > 0) {
       toast({
@@ -141,7 +149,43 @@ export default function Autodescubrimiento() {
       });
       return;
     }
-    setStep('phase1-payment');
+
+    setIsLoading(true);
+
+    try {
+      const historialRespuestas = phase1Questions.map((pregunta, i) => ({
+        pregunta,
+        respuesta: phase1Answers[i],
+      }));
+
+      console.log('Calling screening-teaser function...');
+      const { data, error } = await supabase.functions.invoke('screening-teaser', {
+        body: { edad, genero, destinatario, historialRespuestas },
+      });
+
+      if (error) {
+        console.error('Teaser error:', error);
+        throw new Error(error.message || 'Error al generar el resumen');
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      setTeaserData(data);
+      setStep('phase1-teaser');
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'No se pudo generar el resumen.',
+        variant: 'destructive',
+      });
+      // Fall back to payment step if teaser fails
+      setStep('phase1-payment');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePaymentAndPhase2 = async () => {
@@ -282,6 +326,7 @@ export default function Autodescubrimiento() {
     setPhase1Questions([]);
     setPhase1Answers([]);
     setPhase1Disclaimer('');
+    setTeaserData(null);
     setAnalisisPreliminar(null);
     setPhase2Questions([]);
     setPhase2Answers([]);
@@ -548,8 +593,67 @@ export default function Autodescubrimiento() {
                 <Button variant="outline" onClick={() => setStep('profile')}>
                   Volver
                 </Button>
-                <Button onClick={handleSubmitPhase1} className="gap-2">
-                  Continuar a Fase 2
+                <Button onClick={handleSubmitPhase1} disabled={isLoading} className="gap-2">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Analizando respuestas...
+                    </>
+                  ) : (
+                    <>
+                      Continuar a Fase 2
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Phase 1 Teaser */}
+          {step === 'phase1-teaser' && teaserData && (
+            <div className="space-y-8 animate-fade-in">
+              <ContentBlock variant="success">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle2 className="w-5 h-5 text-success" />
+                  <h2 className="font-heading font-semibold text-xl">Fase 1 Completada</h2>
+                </div>
+                <p className="text-muted-foreground">
+                  Hemos analizado tus respuestas y encontrado patrones interesantes.
+                </p>
+              </ContentBlock>
+
+              <ContentBlock variant="highlight">
+                <div className="space-y-6">
+                  <h3 className="font-heading font-semibold text-lg text-center">
+                    {teaserData.titulo}
+                  </h3>
+                  
+                  <p className="text-muted-foreground text-center leading-relaxed">
+                    {teaserData.resumen}
+                  </p>
+
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {teaserData.patrones.map((patron, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm"
+                      >
+                        <Sparkles className="w-3 h-3" />
+                        {patron}
+                      </span>
+                    ))}
+                  </div>
+
+                  <p className="text-center text-sm text-muted-foreground italic">
+                    {teaserData.cierre}
+                  </p>
+                </div>
+              </ContentBlock>
+
+              <div className="text-center">
+                <Button size="lg" onClick={() => setStep('phase1-payment')} className="gap-2">
+                  Desbloquear Análisis Completo
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
@@ -633,8 +737,8 @@ export default function Autodescubrimiento() {
               </ContentBlock>
 
               <div className="text-center">
-                <Button variant="ghost" onClick={() => setStep('phase1')}>
-                  Volver a las respuestas
+                <Button variant="ghost" onClick={() => setStep('phase1-teaser')}>
+                  Volver al resumen
                 </Button>
               </div>
             </div>
