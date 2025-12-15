@@ -54,6 +54,89 @@ serve(async (req) => {
       `Pregunta ${index + 1}: ${item.pregunta}\nRespuesta: ${item.respuesta}`
     ).join("\n\n");
 
+    const DISCLAIMER =
+      "AVISO IMPORTANTE: Este informe tiene fines exclusivamente orientativos y de cribado. NO constituye un diagnóstico clínico ni sustituye la evaluación realizada por profesionales sanitarios cualificados. Los resultados deben interpretarse como una guía para buscar evaluación profesional adecuada. Cualquier decisión sobre intervención o apoyo debe tomarse en consulta con profesionales de la salud mental y educación especializados.";
+
+    const reportTool = {
+      type: "function",
+      function: {
+        name: "build_final_report",
+        description:
+          "Devuelve el informe final de cribado en un objeto estructurado para generar un PDF.",
+        parameters: {
+          type: "object",
+          properties: {
+            titulo: { type: "string" },
+            perfilEvaluado: {
+              type: "object",
+              properties: {
+                edad: { type: "string" },
+                genero: { type: "string" },
+              },
+              required: ["edad", "genero"],
+              additionalProperties: false,
+            },
+            conclusiones: {
+              type: "object",
+              properties: {
+                hipotesisPerfil: { type: "string" },
+                rasgosClave: {
+                  type: "object",
+                  properties: {
+                    fortalezas: { type: "array", items: { type: "string" } },
+                    desafios: { type: "array", items: { type: "string" } },
+                    caracteristicasND: {
+                      type: "array",
+                      items: { type: "string" },
+                    },
+                  },
+                  required: ["fortalezas", "desafios", "caracteristicasND"],
+                  additionalProperties: false,
+                },
+                resumenNarrativo: { type: "string" },
+              },
+              required: ["hipotesisPerfil", "rasgosClave", "resumenNarrativo"],
+              additionalProperties: false,
+            },
+            recomendaciones: {
+              type: "object",
+              properties: {
+                hogar: { type: "array", items: { type: "string" } },
+                escolar: { type: "array", items: { type: "string" } },
+              },
+              required: ["hogar", "escolar"],
+              additionalProperties: false,
+            },
+            evaluacionProfesional: {
+              type: "object",
+              properties: {
+                profesionalesSugeridos: {
+                  type: "array",
+                  items: { type: "string" },
+                },
+                pruebasSugeridas: { type: "array", items: { type: "string" } },
+                urgencia: { type: "string" },
+              },
+              required: [
+                "profesionalesSugeridos",
+                "pruebasSugeridas",
+                "urgencia",
+              ],
+              additionalProperties: false,
+            },
+          },
+          required: [
+            "titulo",
+            "perfilEvaluado",
+            "conclusiones",
+            "recomendaciones",
+            "evaluacionProfesional",
+          ],
+          additionalProperties: false,
+        },
+      },
+    } as const;
+
     const systemPrompt = `[ROL] Actúa como un psicólogo experto, especializado en neurodivergencia, doble excepcionalidad (2e) y diagnóstico diferencial en población infantil y adolescente.
 
 [OBJETIVO] Generar el informe final completo con conclusiones y recomendaciones para el PDF.
@@ -62,66 +145,10 @@ serve(async (req) => {
 
 [INSTRUCCIONES]
 1. NO generes más preguntas.
-2. Genera el análisis final en un formato de informe limpio y estructurado.
-3. Basa tus conclusiones en TODAS las respuestas de ambas fases.
-4. Sé específico sobre qué aspectos del perfil sugieren cada característica.
-
-[FORMATO DE RESPUESTA]
-Responde SOLO con un JSON válido con esta estructura:
-{
-  "titulo": "Informe de Cribado y Conclusiones Finales",
-  "perfilEvaluado": {
-    "edad": "${edad}",
-    "genero": "${genero}"
-  },
-  "conclusiones": {
-    "hipotesisPerfil": "Descripción detallada del perfil más compatible con las respuestas (ej: 'Perfil sugestivo de Altas Capacidades con rasgos compatibles con TEA')",
-    "rasgosClave": {
-      "fortalezas": [
-        "Fortaleza 1 identificada",
-        "Fortaleza 2 identificada",
-        ...
-      ],
-      "desafios": [
-        "Desafío 1 identificado",
-        "Desafío 2 identificado",
-        ...
-      ],
-      "caracteristicasND": [
-        "Característica neurodivergente 1",
-        "Característica neurodivergente 2",
-        ...
-      ]
-    },
-    "resumenNarrativo": "Párrafo narrativo de 3-4 oraciones resumiendo el perfil general"
-  },
-  "recomendaciones": {
-    "hogar": [
-      "Recomendación práctica para el hogar 1",
-      "Recomendación práctica para el hogar 2",
-      ...
-    ],
-    "escolar": [
-      "Recomendación para el entorno escolar 1",
-      "Recomendación para el entorno escolar 2",
-      ...
-    ]
-  },
-  "evaluacionProfesional": {
-    "profesionalesSugeridos": [
-      "Tipo de profesional 1 (ej: Neuropsicólogo)",
-      "Tipo de profesional 2",
-      ...
-    ],
-    "pruebasSugeridas": [
-      "Prueba o evaluación sugerida 1",
-      "Prueba o evaluación sugerida 2",
-      ...
-    ],
-    "urgencia": "Indicación del nivel de urgencia (ej: 'Recomendable en los próximos 3-6 meses')"
-  },
-  "disclaimer": "AVISO IMPORTANTE: Este informe tiene fines exclusivamente orientativos y de cribado. NO constituye un diagnóstico clínico ni sustituye la evaluación realizada por profesionales sanitarios cualificados. Los resultados deben interpretarse como una guía para buscar evaluación profesional adecuada. Cualquier decisión sobre intervención o apoyo debe tomarse en consulta con profesionales de la salud mental y educación especializados."
-}`;
+2. Responde usando EXCLUSIVAMENTE la herramienta build_final_report.
+3. Mantén el informe conciso para evitar recortes: usa 4-6 ítems por lista como máximo y frases claras.
+4. En perfilEvaluado, usa exactamente la edad y el género proporcionados en el perfil.
+5. No incluyas saltos de línea dentro de frases; usa texto en una sola línea cuando sea posible.`;
 
     const userPrompt = `Perfil del usuario evaluado:
 - Edad: ${edad}
@@ -150,15 +177,17 @@ Genera el informe final completo para el PDF.`;
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.7,
-        max_tokens: 4000,
-      }),
+       body: JSON.stringify({
+         model: "google/gemini-2.5-pro",
+         messages: [
+           { role: "system", content: systemPrompt },
+           { role: "user", content: userPrompt },
+         ],
+         tools: [reportTool],
+         tool_choice: { type: "function", function: { name: "build_final_report" } },
+         temperature: 0.3,
+         max_tokens: 5500,
+       }),
     });
 
     if (!response.ok) {
@@ -180,21 +209,53 @@ Genera el informe final completo para el PDF.`;
       throw new Error(`AI Gateway error: ${response.status}`);
     }
 
-    const data = await response.json();
-    let content = data.choices?.[0]?.message?.content || "";
-    
-    // Clean markdown code blocks if present
-    content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    
-    console.log("Phase 3 final report received");
+     const data = await response.json();
+     const choice = data.choices?.[0];
+     const finishReason = choice?.finish_reason;
 
-    let parsedResponse;
-    try {
-      parsedResponse = JSON.parse(content);
-    } catch (parseError) {
-      console.error("Failed to parse AI response as JSON:", content);
-      throw new Error("Error al procesar la respuesta del análisis");
-    }
+     if (finishReason === "length") {
+       console.error("AI response was truncated (finish_reason=length)");
+       return new Response(
+         JSON.stringify({
+           error:
+             "La respuesta del informe fue demasiado larga y se recortó. Vuelve a intentarlo.",
+         }),
+         {
+           status: 502,
+           headers: { ...corsHeaders, "Content-Type": "application/json" },
+         }
+       );
+     }
+
+     console.log("Phase 3 final report received");
+
+     let parsedResponse: any;
+
+     // Prefer tool-calling arguments for guaranteed JSON structure
+     const toolArgs = choice?.message?.tool_calls?.[0]?.function?.arguments;
+     if (toolArgs) {
+       try {
+         parsedResponse = JSON.parse(toolArgs);
+       } catch (_e) {
+         console.error("Failed to parse tool arguments:", toolArgs);
+         throw new Error("Error al procesar la respuesta del análisis");
+       }
+     } else {
+       let content = choice?.message?.content || "";
+
+       // Clean markdown code blocks if present
+       content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+
+       try {
+         parsedResponse = JSON.parse(content);
+       } catch (_parseError) {
+         console.error("Failed to parse AI response as JSON:", content);
+         throw new Error("Error al procesar la respuesta del análisis");
+       }
+     }
+
+     // Ensure disclaimer is always present (prevents long-text truncation issues)
+     parsedResponse.disclaimer = DISCLAIMER;
 
     return new Response(
       JSON.stringify(parsedResponse),
