@@ -14,7 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useScreeningSession } from '@/hooks/useScreeningSession';
 import { supabase } from '@/integrations/supabase/client';
 
-type Step = 'intro' | 'profile' | 'phase1' | 'phase1-teaser' | 'phase1-payment' | 'phase2' | 'phase2-questions' | 'phase3' | 'complete';
+type Step = 'intro' | 'profile' | 'phase1' | 'phase1-teaser' | 'register-prompt' | 'phase1-payment' | 'phase2' | 'phase2-questions' | 'phase3' | 'complete';
 
 interface RespuestaHistorial {
   pregunta: string;
@@ -98,15 +98,42 @@ export default function Autodescubrimiento() {
     }
   }, [user]);
 
-  const handleStartProfile = () => {
-    if (!user) {
-      toast({
-        title: 'Inicia sesión',
-        description: 'Necesitas una cuenta para guardar tu progreso.',
-      });
-      navigate('/auth');
-      return;
+  // Restore session data after registration
+  useEffect(() => {
+    if (user && !authLoading) {
+      const tempData = sessionStorage.getItem('screening_temp');
+      if (tempData) {
+        try {
+          const parsed = JSON.parse(tempData);
+          setEdad(parsed.edad || '');
+          setGenero(parsed.genero || '');
+          setDestinatario(parsed.destinatario || '');
+          setPhase1Questions(parsed.phase1Questions || []);
+          setPhase1Answers(parsed.phase1Answers || []);
+          setTeaserData(parsed.teaserData || null);
+          
+          // Clear temp storage
+          sessionStorage.removeItem('screening_temp');
+          
+          // Navigate to register-prompt to continue the flow
+          setStep('register-prompt');
+          
+          toast({
+            title: '¡Bienvenido/a!',
+            description: 'Tu cuenta ha sido creada. Continuemos con tu análisis.',
+          });
+        } catch (e) {
+          console.error('Error restoring screening data:', e);
+        }
+      }
     }
+  }, [user, authLoading, toast]);
+
+  // Guest mode state
+  const [isGuestMode, setIsGuestMode] = useState(false);
+
+  const handleStartProfile = () => {
+    // Phase 1 is public - no login required
     setStep('profile');
   };
 
@@ -123,11 +150,8 @@ export default function Autodescubrimiento() {
     setIsLoading(true);
 
     try {
-      // Create session in database
-      const newSessionId = await createSession({ edad, genero, destinatario });
-      if (!newSessionId) {
-        throw new Error('No se pudo crear la sesión');
-      }
+      // Don't create session yet - Phase 1 is public
+      // Session will be created after registration
 
       console.log('Calling screening-phase1 function...');
       const { data, error } = await supabase.functions.invoke('screening-phase1', {
@@ -199,9 +223,7 @@ export default function Autodescubrimiento() {
         throw new Error(data.error);
       }
 
-      // Save phase 1 data to database
-      await savePhase1(phase1Questions, historialRespuestas, data);
-
+      // Don't save to database yet - wait for registration
       setTeaserData(data);
       setStep('phase1-teaser');
     } catch (error) {
@@ -691,10 +713,148 @@ export default function Autodescubrimiento() {
               </ContentBlock>
 
               <div className="text-center">
-                <Button size="lg" onClick={() => setStep('phase1-payment')} className="gap-2">
+                <Button size="lg" onClick={() => setStep('register-prompt')} className="gap-2">
                   Desbloquear Análisis Completo
                   <ArrowRight className="w-4 h-4" />
                 </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Register Prompt Step */}
+          {step === 'register-prompt' && (
+            <div className="space-y-8 animate-fade-in">
+              <ContentBlock variant="warning">
+                <div className="flex gap-4">
+                  <AlertCircle className="w-6 h-6 text-warning-foreground shrink-0" />
+                  <div>
+                    <h3 className="font-heading font-semibold text-lg mb-2">¡No pierdas tu progreso!</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Has completado la Fase 1 y hemos encontrado patrones interesantes en tus respuestas. 
+                      Si no creas una cuenta ahora, <strong>toda esta información se perderá</strong> y no podrás acceder a tu historial de análisis.
+                    </p>
+                    <ul className="text-sm text-muted-foreground space-y-2 mb-4">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        Guarda tus respuestas y análisis de forma segura
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        Accede a tu historial de informes cuando quieras
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        Recibe tu informe final por email
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </ContentBlock>
+
+              <div className="flex flex-col gap-4">
+                {user ? (
+                  <ContentBlock variant="success">
+                    <div className="flex items-center gap-4">
+                      <CheckCircle2 className="w-6 h-6 text-success" />
+                      <div>
+                        <p className="font-medium">Ya tienes una cuenta activa</p>
+                        <p className="text-sm text-muted-foreground">Tu progreso se guardará automáticamente.</p>
+                      </div>
+                    </div>
+                    <Button 
+                      size="lg" 
+                      className="w-full mt-4 gap-2"
+                      onClick={async () => {
+                        setIsLoading(true);
+                        try {
+                          // Create session and save Phase 1 data
+                          const newSessionId = await createSession({ edad, genero, destinatario });
+                          if (newSessionId) {
+                            const historialRespuestas = phase1Questions.map((pregunta, i) => ({
+                              pregunta,
+                              respuesta: phase1Answers[i],
+                            }));
+                            await savePhase1(phase1Questions, historialRespuestas, teaserData);
+                          }
+                          setIsGuestMode(false);
+                          setStep('phase1-payment');
+                        } catch (error) {
+                          console.error('Error saving session:', error);
+                          toast({
+                            title: 'Error',
+                            description: 'No se pudo guardar la sesión.',
+                            variant: 'destructive',
+                          });
+                        } finally {
+                          setIsLoading(false);
+                        }
+                      }}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Guardando...
+                        </>
+                      ) : (
+                        <>
+                          Continuar al Análisis Completo
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </Button>
+                  </ContentBlock>
+                ) : (
+                  <>
+                    <Button 
+                      size="lg" 
+                      className="w-full gap-2"
+                      onClick={() => {
+                        // Store current state in sessionStorage for after registration
+                        sessionStorage.setItem('screening_temp', JSON.stringify({
+                          edad, genero, destinatario,
+                          phase1Questions, phase1Answers,
+                          teaserData
+                        }));
+                        navigate('/auth?redirect=/autodescubrimiento&action=register');
+                      }}
+                    >
+                      <LogIn className="w-4 h-4" />
+                      Crear Cuenta y Guardar Progreso
+                    </Button>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">o</span>
+                      </div>
+                    </div>
+
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="w-full gap-2"
+                      onClick={() => {
+                        setIsGuestMode(true);
+                        toast({
+                          title: 'Modo invitado',
+                          description: 'Continuarás sin guardar tu progreso. Solo podrás completar la Fase 1.',
+                        });
+                        // In guest mode, they can't proceed - redirect back to intro or show limitation
+                        setStep('intro');
+                        resetProcessHandler();
+                      }}
+                    >
+                      Continuar como Invitado (sin guardar)
+                    </Button>
+
+                    <p className="text-xs text-center text-muted-foreground">
+                      Los usuarios invitados solo pueden completar la Fase 1 y no tendrán acceso al análisis completo ni al historial.
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           )}

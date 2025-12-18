@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,11 @@ const authSchema = z.object({
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, loading: authLoading, signIn, signUp } = useAuth();
+  
+  const redirectTo = searchParams.get('redirect') || '/autodescubrimiento';
+  const defaultTab = searchParams.get('action') === 'register' ? 'register' : 'login';
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [email, setEmail] = useState("");
@@ -29,9 +33,9 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate("/autodescubrimiento");
+      navigate(redirectTo);
     }
-  }, [user, navigate]);
+  }, [user, navigate, redirectTo]);
 
   const validateForm = (includeDisplayName: boolean) => {
     const result = authSchema.safeParse({
@@ -71,7 +75,7 @@ const Auth = () => {
     }
 
     toast.success("¡Bienvenido/a de vuelta!");
-    navigate("/autodescubrimiento");
+    navigate(redirectTo);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -91,8 +95,8 @@ const Auth = () => {
       return;
     }
 
-    toast.success("¡Cuenta creada! Ahora puedes comenzar tu viaje.");
-    navigate("/autodescubrimiento");
+    toast.success("¡Cuenta creada! Ahora puedes continuar.");
+    navigate(redirectTo);
   };
 
   if (authLoading) {
@@ -116,7 +120,7 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" className="w-full">
+            <Tabs defaultValue={defaultTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Iniciar sesión</TabsTrigger>
                 <TabsTrigger value="register">Registrarse</TabsTrigger>
