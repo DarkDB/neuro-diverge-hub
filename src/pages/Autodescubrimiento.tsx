@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Compass, Lock, Sparkles, FileText, Mail, ArrowRight, AlertCircle, Loader2, User, Calendar, CheckCircle2, LogIn } from 'lucide-react';
+import { Compass, Lock, Sparkles, FileText, Mail, ArrowRight, AlertCircle, Loader2, User, Calendar, CheckCircle2, LogIn, Download } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { ContentBlock } from '@/components/ui/ContentBlock';
@@ -373,6 +373,55 @@ export default function Autodescubrimiento() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!informeFinal) return;
+    
+    setIsDownloadingPdf(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-pdf', {
+        body: { informeFinal, email, destinatario },
+      });
+
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+
+      // Convert base64 to blob and download
+      const byteCharacters = atob(data.pdf);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = data.filename || 'informe-cribado.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: 'PDF descargado',
+        description: 'Tu informe ha sido descargado correctamente.',
+      });
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'No se pudo generar el PDF.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDownloadingPdf(false);
     }
   };
 
@@ -1191,9 +1240,24 @@ export default function Autodescubrimiento() {
                 <p className="text-sm text-muted-foreground">
                   Informe generado para: <strong>{email}</strong>
                 </p>
-                <Button variant="outline" onClick={resetProcessHandler}>
-                  Realizar nuevo cribado
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button onClick={handleDownloadPdf} disabled={isDownloadingPdf} className="gap-2">
+                    {isDownloadingPdf ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Generando PDF...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4" />
+                        Descargar PDF
+                      </>
+                    )}
+                  </Button>
+                  <Button variant="outline" onClick={resetProcessHandler}>
+                    Realizar nuevo cribado
+                  </Button>
+                </div>
               </div>
             </div>
           )}
