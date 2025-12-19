@@ -60,6 +60,9 @@ serve(async (req) => {
    - Para niñas/mujeres: TDAH inatento, masking en TEA
    - Para edad preescolar: hipersensibilidad, dificultades de regulación
    - Para adolescentes/adultos: ansiedad social, agotamiento por masking
+5. IMPORTANTE: La ÚLTIMA pregunta SIEMPRE debe ser una pregunta abierta que invite al informante a compartir cualquier otra observación o característica relevante que no se haya cubierto en las preguntas anteriores. Ejemplos:
+   - Si es para sí mismo/a: "¿Hay algo más sobre ti que creas importante compartir y que no hayamos abordado en las preguntas anteriores?"
+   - Si es para otra persona: "¿Ha notado alguna otra característica o comportamiento que considere relevante y que le gustaría comentar?"
 
 [FORMATO DE RESPUESTA]
 Responde SOLO con un JSON válido con esta estructura:
@@ -70,6 +73,7 @@ Responde SOLO con un JSON válido con esta estructura:
     "Pregunta 1...",
     "Pregunta 2...",
     ...
+    "Pregunta abierta final sobre observaciones adicionales"
   ],
   "disclaimer": "Recordatorio de que este cribado no sustituye una evaluación profesional."
 }`;
