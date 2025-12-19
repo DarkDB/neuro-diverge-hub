@@ -19,6 +19,8 @@ import Cookies from "./pages/Cookies";
 import AvisoLegal from "./pages/AvisoLegal";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import ArticlesDashboard from "./pages/admin/ArticlesDashboard";
+import ArticleEditor from "./pages/admin/ArticleEditor";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +41,9 @@ const App = () => (
               <Route path="/recursos/tdah" element={<TDAHPage />} />
               <Route path="/tests" element={<Tests />} />
               <Route path="/diario" element={<Diario />} />
+              <Route path="/admin/articulos" element={<ArticlesDashboard />} />
+              <Route path="/admin/articulos/nuevo" element={<ArticleEditor />} />
+              <Route path="/admin/articulos/:id" element={<ArticleEditor />} />
               <Route path="/privacidad" element={<Privacidad />} />
               <Route path="/cookies" element={<Cookies />} />
               <Route path="/aviso-legal" element={<AvisoLegal />} />

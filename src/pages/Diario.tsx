@@ -1,66 +1,64 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { PenLine, Calendar, ArrowRight, Tag } from 'lucide-react';
+import { PenLine, Calendar, ArrowRight, Tag, Settings } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { SectionTitle } from '@/components/ui/SectionTitle';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useAdmin } from '@/hooks/useAdmin';
 
-const posts = [
-  {
-    id: 1,
-    slug: 'descubriendo-mi-tdah-a-los-35',
-    title: 'Descubriendo mi TDAH a los 35',
-    excerpt: 'Un viaje personal de autodescubrimiento que cambió mi forma de entenderme. Cómo reconocer las señales que siempre estuvieron ahí.',
-    date: '2024-01-15',
-    category: 'TDAH',
-    readTime: '8 min',
-  },
-  {
-    id: 2,
-    slug: 'el-agotamiento-del-masking',
-    title: 'El agotamiento del masking: cuando fingir tiene un precio',
-    excerpt: 'Reflexiones sobre el coste emocional de camuflar nuestra neurodivergencia para encajar en un mundo neurotípico.',
-    date: '2024-01-08',
-    category: 'Autismo',
-    readTime: '6 min',
-  },
-  {
-    id: 3,
-    slug: 'hiperfoco-superpoder-o-maldicion',
-    title: 'Hiperfoco: ¿Superpoder o maldición?',
-    excerpt: 'Explorando la dualidad del hiperfoco en el TDAH. Cuando la concentración intensa es una espada de doble filo.',
-    date: '2024-01-01',
-    category: 'TDAH',
-    readTime: '5 min',
-  },
-  {
-    id: 4,
-    slug: 'sensibilidad-sensorial-vida-diaria',
-    title: 'Navegando la sensibilidad sensorial en la vida diaria',
-    excerpt: 'Estrategias prácticas para manejar la sobrecarga sensorial en entornos cotidianos como el trabajo y los espacios públicos.',
-    date: '2023-12-20',
-    category: 'Sensorialidad',
-    readTime: '7 min',
-  },
-  {
-    id: 5,
-    slug: 'disfuncion-ejecutiva-no-es-pereza',
-    title: 'Disfunción ejecutiva: no es pereza, es neurología',
-    excerpt: 'Entendiendo por qué a veces no podemos hacer cosas que queremos hacer, y cómo dejar de culparnos por ello.',
-    date: '2023-12-15',
-    category: 'General',
-    readTime: '6 min',
-  },
-];
+interface Article {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  published_at: string | null;
+  created_at: string;
+  category: string;
+  read_time: string;
+}
 
-const categories = ['Todos', 'TDAH', 'Autismo', 'Sensorialidad', 'General'];
+const categories = ['Todos', 'TDAH', 'Autismo', 'Sensorialidad', 'General', 'Altas Capacidades', 'Dislexia'];
 
 export default function Diario() {
-  const formatDate = (dateString: string) => {
+  const { isAdmin } = useAdmin();
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
+
+  useEffect(() => {
+    fetchArticles();
+  }, []);
+
+  async function fetchArticles() {
+    try {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('id, slug, title, excerpt, published_at, created_at, category, read_time')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false });
+
+      if (error) throw error;
+      setArticles(data || []);
+    } catch (error) {
+      console.error('Error fetching articles:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('es-ES', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
     });
   };
+
+  const filteredArticles = selectedCategory === 'Todos'
+    ? articles
+    : articles.filter(article => article.category === selectedCategory);
 
   return (
     <Layout>
@@ -79,6 +77,17 @@ export default function Diario() {
             >
               El Diario del Autodescubrimiento
             </SectionTitle>
+            
+            {isAdmin && (
+              <div className="mt-6">
+                <Button asChild variant="outline">
+                  <Link to="/admin/articulos">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Gestionar Artículos
+                  </Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -87,50 +96,66 @@ export default function Diario() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Content */}
           <div className="flex-1">
-            <div className="space-y-6">
-              {posts.map((post, index) => (
-                <article
-                  key={post.id}
-                  className="group p-6 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all animate-fade-in"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
-                    <span className="inline-flex items-center gap-1">
-                      <Tag className="w-3 h-3" />
-                      {post.category}
-                    </span>
-                    <span>·</span>
-                    <span className="inline-flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {formatDate(post.date)}
-                    </span>
-                    <span>·</span>
-                    <span>{post.readTime} de lectura</span>
-                  </div>
-                  
-                  <Link 
-                    to={`/diario/${post.slug}`}
-                    className="focus-ring rounded-lg"
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : filteredArticles.length === 0 ? (
+              <div className="text-center py-12">
+                <PenLine className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-semibold text-lg mb-2">No hay artículos disponibles</h3>
+                <p className="text-muted-foreground">
+                  {selectedCategory !== 'Todos' 
+                    ? 'No hay artículos en esta categoría' 
+                    : 'Pronto publicaremos nuevos contenidos'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {filteredArticles.map((article, index) => (
+                  <article
+                    key={article.id}
+                    className="group p-6 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all animate-fade-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <h2 className="font-heading font-semibold text-xl mb-2 group-hover:text-primary transition-colors">
-                      {post.title}
-                    </h2>
-                  </Link>
-                  
-                  <p className="text-muted-foreground mb-4">
-                    {post.excerpt}
-                  </p>
-                  
-                  <Link
-                    to={`/diario/${post.slug}`}
-                    className="inline-flex items-center gap-2 text-primary text-sm font-medium group-hover:gap-3 transition-all focus-ring rounded"
-                  >
-                    Leer más
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </article>
-              ))}
-            </div>
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
+                      <span className="inline-flex items-center gap-1">
+                        <Tag className="w-3 h-3" />
+                        {article.category}
+                      </span>
+                      <span>·</span>
+                      <span className="inline-flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {formatDate(article.published_at || article.created_at)}
+                      </span>
+                      <span>·</span>
+                      <span>{article.read_time} de lectura</span>
+                    </div>
+                    
+                    <Link 
+                      to={`/diario/${article.slug}`}
+                      className="focus-ring rounded-lg"
+                    >
+                      <h2 className="font-heading font-semibold text-xl mb-2 group-hover:text-primary transition-colors">
+                        {article.title}
+                      </h2>
+                    </Link>
+                    
+                    <p className="text-muted-foreground mb-4">
+                      {article.excerpt}
+                    </p>
+                    
+                    <Link
+                      to={`/diario/${article.slug}`}
+                      className="inline-flex items-center gap-2 text-primary text-sm font-medium group-hover:gap-3 transition-all focus-ring rounded"
+                    >
+                      Leer más
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -143,7 +168,12 @@ export default function Diario() {
                   {categories.map((category) => (
                     <button
                       key={category}
-                      className="px-3 py-1.5 rounded-full text-sm bg-accent text-accent-foreground hover:bg-primary hover:text-primary-foreground transition-colors focus-ring"
+                      onClick={() => setSelectedCategory(category)}
+                      className={`px-3 py-1.5 rounded-full text-sm transition-colors focus-ring ${
+                        selectedCategory === category
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-accent text-accent-foreground hover:bg-primary hover:text-primary-foreground'
+                      }`}
                     >
                       {category}
                     </button>
