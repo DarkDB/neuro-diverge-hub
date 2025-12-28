@@ -21,6 +21,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import ArticlesDashboard from "./pages/admin/ArticlesDashboard";
 import ArticleEditor from "./pages/admin/ArticleEditor";
+import ArticleView from "./pages/ArticleView";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/recursos/tdah" element={<TDAHPage />} />
               <Route path="/tests" element={<Tests />} />
               <Route path="/diario" element={<Diario />} />
+              <Route path="/diario/:slug" element={<ArticleView />} />
               <Route path="/admin/articulos" element={<ArticlesDashboard />} />
               <Route path="/admin/articulos/nuevo" element={<ArticleEditor />} />
               <Route path="/admin/articulos/:id" element={<ArticleEditor />} />
