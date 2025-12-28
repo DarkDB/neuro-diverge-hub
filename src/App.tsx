@@ -22,6 +22,10 @@ import NotFound from "./pages/NotFound";
 import ArticlesDashboard from "./pages/admin/ArticlesDashboard";
 import ArticleEditor from "./pages/admin/ArticleEditor";
 import ArticleView from "./pages/ArticleView";
+import TDAHAdultosTest from "./pages/tests/TDAHAdultos";
+import TEAAQ10Test from "./pages/tests/TEAAQ10";
+import DislexiaTest from "./pages/tests/Dislexia";
+import FuncionesEjecutivasTest from "./pages/tests/FuncionesEjecutivas";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +45,10 @@ const App = () => (
               <Route path="/recursos" element={<Recursos />} />
               <Route path="/recursos/tdah" element={<TDAHPage />} />
               <Route path="/tests" element={<Tests />} />
+              <Route path="/tests/tdah-adultos" element={<TDAHAdultosTest />} />
+              <Route path="/tests/tea-aq10" element={<TEAAQ10Test />} />
+              <Route path="/tests/dislexia" element={<DislexiaTest />} />
+              <Route path="/tests/funciones-ejecutivas" element={<FuncionesEjecutivasTest />} />
               <Route path="/diario" element={<Diario />} />
               <Route path="/diario/:slug" element={<ArticleView />} />
               <Route path="/admin/articulos" element={<ArticlesDashboard />} />
