@@ -31,6 +31,8 @@ import TDAHAdultosTest from "./pages/tests/TDAHAdultos";
 import TEAAQ10Test from "./pages/tests/TEAAQ10";
 import DislexiaTest from "./pages/tests/Dislexia";
 import FuncionesEjecutivasTest from "./pages/tests/FuncionesEjecutivas";
+import DiscalculiaTest from "./pages/tests/Discalculia";
+import DispraxiaTest from "./pages/tests/Dispraxia";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +61,8 @@ const App = () => (
               <Route path="/tests/tea-aq10" element={<TEAAQ10Test />} />
               <Route path="/tests/dislexia" element={<DislexiaTest />} />
               <Route path="/tests/funciones-ejecutivas" element={<FuncionesEjecutivasTest />} />
+              <Route path="/tests/discalculia" element={<DiscalculiaTest />} />
+              <Route path="/tests/dispraxia" element={<DispraxiaTest />} />
               <Route path="/diario" element={<Diario />} />
               <Route path="/diario/:slug" element={<ArticleView />} />
               <Route path="/admin/articulos" element={<ArticlesDashboard />} />
