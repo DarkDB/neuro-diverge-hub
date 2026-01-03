@@ -14,6 +14,11 @@ import Recursos from "./pages/Recursos";
 import Tests from "./pages/Tests";
 import Diario from "./pages/Diario";
 import TDAHPage from "./pages/recursos/TDAH";
+import TEAPage from "./pages/recursos/TEA";
+import AACCPage from "./pages/recursos/AACC";
+import DislexiaPage from "./pages/recursos/Dislexia";
+import DiscalculiaPage from "./pages/recursos/Discalculia";
+import DispraxiaPage from "./pages/recursos/Dispraxia";
 import Privacidad from "./pages/Privacidad";
 import Cookies from "./pages/Cookies";
 import AvisoLegal from "./pages/AvisoLegal";
@@ -44,6 +49,11 @@ const App = () => (
               <Route path="/autodescubrimiento" element={<Autodescubrimiento />} />
               <Route path="/recursos" element={<Recursos />} />
               <Route path="/recursos/tdah" element={<TDAHPage />} />
+              <Route path="/recursos/tea" element={<TEAPage />} />
+              <Route path="/recursos/aacc" element={<AACCPage />} />
+              <Route path="/recursos/dislexia" element={<DislexiaPage />} />
+              <Route path="/recursos/discalculia" element={<DiscalculiaPage />} />
+              <Route path="/recursos/dispraxia" element={<DispraxiaPage />} />
               <Route path="/tests" element={<Tests />} />
               <Route path="/tests/tdah-adultos" element={<TDAHAdultosTest />} />
               <Route path="/tests/tea-aq10" element={<TEAAQ10Test />} />
