@@ -39,6 +39,22 @@ const tests = [
     time: '8-12 min',
     href: '/tests/funciones-ejecutivas',
   },
+  {
+    id: 'discalculia',
+    name: 'Screening de Discalculia',
+    description: 'Evaluación de indicadores de dificultades en el procesamiento numérico.',
+    questions: 15,
+    time: '5-8 min',
+    href: '/tests/discalculia',
+  },
+  {
+    id: 'dispraxia',
+    name: 'Screening de Dispraxia/TDC',
+    description: 'Evaluación de dificultades en la coordinación motora y planificación de movimientos.',
+    questions: 18,
+    time: '7-10 min',
+    href: '/tests/dispraxia',
+  },
 ];
 
 export default function Tests() {
@@ -133,10 +149,6 @@ export default function Tests() {
             ))}
           </div>
 
-          {/* Próximamente */}
-          <div className="mt-8 text-center text-muted-foreground">
-            <p className="text-sm">Más tests próximamente: Discalculia, Dispraxia, Ansiedad Social...</p>
-          </div>
         </div>
       </div>
     </Layout>
