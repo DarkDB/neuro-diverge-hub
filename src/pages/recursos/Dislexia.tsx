@@ -120,15 +120,19 @@ export default function DislexiaPage() {
               Manifestaciones
             </SectionTitle>
             
-            <Tabs defaultValue="adultos" className="w-full">
+            <Tabs defaultValue="hombres" className="w-full">
               <TabsList className="w-full flex flex-wrap h-auto gap-2 bg-transparent p-0 mb-6">
                 <TabsTrigger value="ninos" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Baby className="w-4 h-4" />
-                  Niños/as
+                  Niños
                 </TabsTrigger>
-                <TabsTrigger value="adultos" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <TabsTrigger value="ninas" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Baby className="w-4 h-4" />
+                  Niñas
+                </TabsTrigger>
+                <TabsTrigger value="hombres" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <User className="w-4 h-4" />
-                  Adultos
+                  Hombres
                 </TabsTrigger>
                 <TabsTrigger value="mujeres" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Users className="w-4 h-4" />
@@ -138,36 +142,53 @@ export default function DislexiaPage() {
               
               <TabsContent value="ninos">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">Dislexia en la Infancia</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">Dislexia en Niños</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
                       Las primeras señales pueden aparecer en preescolar: dificultad para 
                       aprender rimas, confusión con sonidos de letras, y retraso en el 
-                      desarrollo del habla. En primaria, la lectura y escritura suponen 
-                      un esfuerzo mucho mayor que para otros niños.
+                      desarrollo del habla.
                     </p>
                     <p>
-                      Sin identificación temprana, los niños pueden desarrollar baja autoestima, 
-                      ansiedad escolar y rechazo hacia el aprendizaje académico.
+                      Los niños con dislexia pueden mostrar frustración con la lectura, 
+                      evitar tareas escolares y desarrollar problemas de conducta como 
+                      respuesta a sus dificultades académicas no comprendidas.
+                    </p>
+                  </div>
+                </ContentBlock>
+              </TabsContent>
+
+              <TabsContent value="ninas">
+                <ContentBlock>
+                  <h3 className="font-heading font-semibold text-lg mb-4">Dislexia en Niñas</h3>
+                  <div className="space-y-4 text-muted-foreground">
+                    <p>
+                      Las niñas con dislexia suelen ser menos identificadas porque tienden 
+                      a compensar más y causar menos disrupciones en clase. Pueden ser 
+                      vistas como "lentas" o "poco motivadas".
+                    </p>
+                    <p>
+                      Suelen internalizar más sus dificultades, pudiendo desarrollar baja 
+                      autoestima, ansiedad escolar y rechazo hacia la lectura que se 
+                      interpreta erróneamente como falta de interés.
                     </p>
                   </div>
                 </ContentBlock>
               </TabsContent>
               
-              <TabsContent value="adultos">
+              <TabsContent value="hombres">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">Dislexia en la Edad Adulta</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">Dislexia en Hombres Adultos</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
-                      Muchos adultos con dislexia han desarrollado estrategias compensatorias, 
-                      pero siguen experimentando dificultades con la lectura rápida, la 
-                      ortografía, o la toma de notas. El esfuerzo extra puede resultar en 
-                      fatiga.
+                      Los hombres adultos con dislexia han desarrollado estrategias compensatorias, 
+                      pero pueden seguir experimentando dificultades con la lectura rápida, la 
+                      ortografía, o la toma de notas.
                     </p>
                     <p>
                       En el entorno laboral, pueden evitar tareas que requieran lectura o 
-                      escritura extensiva. La tecnología (correctores ortográficos, texto 
-                      a voz) puede ser una gran aliada.
+                      escritura extensiva. Muchos eligen carreras donde sus fortalezas 
+                      en pensamiento visual y resolución de problemas sean valoradas.
                     </p>
                   </div>
                 </ContentBlock>
@@ -175,7 +196,7 @@ export default function DislexiaPage() {
               
               <TabsContent value="mujeres">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">Dislexia en Mujeres</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">Dislexia en Mujeres Adultas</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
                       Las mujeres con dislexia tienden a desarrollar estrategias de 

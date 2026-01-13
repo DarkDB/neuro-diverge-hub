@@ -96,15 +96,19 @@ export default function DiscalculiaPage() {
               Manifestaciones
             </SectionTitle>
             
-            <Tabs defaultValue="adultos" className="w-full">
+            <Tabs defaultValue="hombres" className="w-full">
               <TabsList className="w-full flex flex-wrap h-auto gap-2 bg-transparent p-0 mb-6">
                 <TabsTrigger value="ninos" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Baby className="w-4 h-4" />
-                  Niños/as
+                  Niños
                 </TabsTrigger>
-                <TabsTrigger value="adultos" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <TabsTrigger value="ninas" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Baby className="w-4 h-4" />
+                  Niñas
+                </TabsTrigger>
+                <TabsTrigger value="hombres" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <User className="w-4 h-4" />
-                  Adultos
+                  Hombres
                 </TabsTrigger>
                 <TabsTrigger value="mujeres" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Users className="w-4 h-4" />
@@ -114,7 +118,7 @@ export default function DiscalculiaPage() {
               
               <TabsContent value="ninos">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">Discalculia en la Infancia</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">Discalculia en Niños</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
                       Las señales tempranas incluyen dificultad para aprender a contar, 
@@ -124,26 +128,44 @@ export default function DiscalculiaPage() {
                     </p>
                     <p>
                       En la escuela, las matemáticas se convierten en una fuente de 
-                      frustración y ansiedad. Los niños pueden ser etiquetados como 
-                      "vagos" cuando en realidad tienen una dificultad específica.
+                      frustración. Los niños pueden exteriorizar su frustración con 
+                      comportamientos disruptivos o evitación de tareas.
+                    </p>
+                  </div>
+                </ContentBlock>
+              </TabsContent>
+
+              <TabsContent value="ninas">
+                <ContentBlock>
+                  <h3 className="font-heading font-semibold text-lg mb-4">Discalculia en Niñas</h3>
+                  <div className="space-y-4 text-muted-foreground">
+                    <p>
+                      Las niñas con discalculia pueden ser menos identificadas debido a 
+                      estereotipos que normalizan sus dificultades matemáticas. Pueden 
+                      ser etiquetadas como "no les gustan las mates" sin investigar más.
+                    </p>
+                    <p>
+                      Suelen internalizar la ansiedad matemática y desarrollar creencias 
+                      limitantes sobre sus capacidades. La falta de diagnóstico temprano 
+                      afecta sus opciones académicas y profesionales futuras.
                     </p>
                   </div>
                 </ContentBlock>
               </TabsContent>
               
-              <TabsContent value="adultos">
+              <TabsContent value="hombres">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">Discalculia en la Edad Adulta</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">Discalculia en Hombres Adultos</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
-                      Los adultos con discalculia pueden tener dificultades con tareas 
+                      Los hombres adultos con discalculia pueden tener dificultades con tareas 
                       cotidianas como manejar dinero, calcular propinas, seguir recetas 
                       con medidas, o gestionar horarios y citas.
                     </p>
                     <p>
-                      Muchos desarrollan estrategias compensatorias como usar calculadoras 
-                      constantemente o evitar trabajos que requieran matemáticas. La 
-                      tecnología puede ser una gran ayuda en la vida diaria.
+                      Pueden desarrollar estrategias compensatorias como usar calculadoras 
+                      constantemente o delegar tareas numéricas. En el trabajo, pueden 
+                      evitar roles que requieran matemáticas frecuentes.
                     </p>
                   </div>
                 </ContentBlock>
@@ -151,7 +173,7 @@ export default function DiscalculiaPage() {
               
               <TabsContent value="mujeres">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">Discalculia en Mujeres</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">Discalculia en Mujeres Adultas</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
                       Históricamente, las dificultades matemáticas en mujeres han sido 

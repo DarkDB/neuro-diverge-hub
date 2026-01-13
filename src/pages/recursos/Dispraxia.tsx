@@ -97,15 +97,19 @@ export default function DispraxiaPage() {
               Manifestaciones
             </SectionTitle>
             
-            <Tabs defaultValue="adultos" className="w-full">
+            <Tabs defaultValue="hombres" className="w-full">
               <TabsList className="w-full flex flex-wrap h-auto gap-2 bg-transparent p-0 mb-6">
                 <TabsTrigger value="ninos" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Baby className="w-4 h-4" />
-                  Niños/as
+                  Niños
                 </TabsTrigger>
-                <TabsTrigger value="adultos" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <TabsTrigger value="ninas" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Baby className="w-4 h-4" />
+                  Niñas
+                </TabsTrigger>
+                <TabsTrigger value="hombres" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <User className="w-4 h-4" />
-                  Adultos
+                  Hombres
                 </TabsTrigger>
                 <TabsTrigger value="mujeres" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Users className="w-4 h-4" />
@@ -115,31 +119,48 @@ export default function DispraxiaPage() {
               
               <TabsContent value="ninos">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">Dispraxia en la Infancia</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">Dispraxia en Niños</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
                       Los niños con dispraxia pueden tardar más en alcanzar hitos motores 
-                      como gatear, caminar, o usar cubiertos. En el colegio, las tareas 
-                      como escribir, recortar o atarse los cordones suponen un reto significativo.
+                      como gatear, caminar, o usar cubiertos. Las tareas como escribir, 
+                      recortar o atarse los cordones suponen un reto significativo.
                     </p>
                     <p>
-                      En educación física y en el recreo pueden sentirse excluidos o evitar 
-                      actividades físicas. Sin apoyo adecuado, pueden desarrollar baja 
-                      autoestima y ansiedad social.
+                      En educación física y en el recreo pueden sentirse excluidos de 
+                      deportes y juegos físicos. Sin apoyo adecuado, pueden desarrollar 
+                      baja autoestima relacionada con su coordinación.
+                    </p>
+                  </div>
+                </ContentBlock>
+              </TabsContent>
+
+              <TabsContent value="ninas">
+                <ContentBlock>
+                  <h3 className="font-heading font-semibold text-lg mb-4">Dispraxia en Niñas</h3>
+                  <div className="space-y-4 text-muted-foreground">
+                    <p>
+                      Las niñas con dispraxia pueden pasar más desapercibidas ya que se 
+                      les exige menos participación en deportes competitivos. Sus 
+                      dificultades pueden ser minimizadas o atribuidas a "falta de interés".
+                    </p>
+                    <p>
+                      Pueden tener dificultades con actividades como peinarse, maquillarse 
+                      más adelante, o vestirse con ropa con muchos cierres. Esto puede 
+                      afectar su autoestima y relaciones sociales.
                     </p>
                   </div>
                 </ContentBlock>
               </TabsContent>
               
-              <TabsContent value="adultos">
+              <TabsContent value="hombres">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">Dispraxia en la Edad Adulta</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">Dispraxia en Hombres Adultos</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
-                      Los adultos con dispraxia pueden tener dificultades con tareas 
+                      Los hombres adultos con dispraxia pueden tener dificultades con tareas 
                       cotidianas como cocinar, conducir, o mantener el hogar organizado. 
-                      La fatiga es común debido al esfuerzo extra requerido para tareas 
-                      que otros automatizan.
+                      La fatiga es común debido al esfuerzo extra requerido.
                     </p>
                     <p>
                       En el trabajo, pueden destacar en tareas que requieran pensamiento 
@@ -152,7 +173,7 @@ export default function DispraxiaPage() {
               
               <TabsContent value="mujeres">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">Dispraxia en Mujeres</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">Dispraxia en Mujeres Adultas</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
                       La dispraxia en mujeres ha sido menos estudiada. Las expectativas 

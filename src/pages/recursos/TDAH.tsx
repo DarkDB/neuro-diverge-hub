@@ -95,15 +95,19 @@ export default function TDAHPage() {
               Manifestaciones
             </SectionTitle>
             
-            <Tabs defaultValue="adultos" className="w-full">
+            <Tabs defaultValue="hombres" className="w-full">
               <TabsList className="w-full flex flex-wrap h-auto gap-2 bg-transparent p-0 mb-6">
                 <TabsTrigger value="ninos" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Baby className="w-4 h-4" />
-                  Niños/as
+                  Niños
                 </TabsTrigger>
-                <TabsTrigger value="adultos" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <TabsTrigger value="ninas" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Baby className="w-4 h-4" />
+                  Niñas
+                </TabsTrigger>
+                <TabsTrigger value="hombres" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <User className="w-4 h-4" />
-                  Adultos
+                  Hombres
                 </TabsTrigger>
                 <TabsTrigger value="mujeres" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Users className="w-4 h-4" />
@@ -113,34 +117,52 @@ export default function TDAHPage() {
               
               <TabsContent value="ninos">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">TDAH en la Infancia</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">TDAH en Niños</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
                       En niños, el TDAH suele manifestarse con hiperactividad más visible: 
                       correr, trepar, dificultad para quedarse quietos. Los problemas académicos 
-                      suelen ser la señal de alarma más común.
+                      y de comportamiento suelen ser la señal de alarma más común.
                     </p>
+                    <p>
+                      Pueden ser descritos como "inquietos", "impulsivos" o "que no escuchan". 
+                      Suelen tener más dificultades para seguir instrucciones y respetar 
+                      turnos en juegos y conversaciones.
+                    </p>
+                  </div>
+                </ContentBlock>
+              </TabsContent>
+
+              <TabsContent value="ninas">
+                <ContentBlock>
+                  <h3 className="font-heading font-semibold text-lg mb-4">TDAH en Niñas</h3>
+                  <div className="space-y-4 text-muted-foreground">
                     <p>
                       Las niñas frecuentemente presentan el subtipo inatento, lo que puede 
                       pasar desapercibido. Suelen ser descritas como "soñadoras" o "despistadas" 
                       sin que se sospeche TDAH.
                     </p>
+                    <p>
+                      Tienden a internalizar más sus dificultades, pudiendo desarrollar 
+                      ansiedad o baja autoestima. Es menos probable que reciban diagnóstico 
+                      temprano debido a que sus síntomas no son tan "disruptivos" como en niños.
+                    </p>
                   </div>
                 </ContentBlock>
               </TabsContent>
               
-              <TabsContent value="adultos">
+              <TabsContent value="hombres">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">TDAH en la Edad Adulta</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">TDAH en Hombres Adultos</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
                       La hiperactividad física suele transformarse en inquietud interna, 
                       sensación de estar "acelerado mentalmente", dificultad para relajarse.
                     </p>
                     <p>
-                      Los adultos con TDAH suelen luchar con la gestión del tiempo, la 
-                      organización, las finanzas y el mantenimiento de relaciones. Muchos 
-                      desarrollan ansiedad o depresión como consecuencia de años sin diagnóstico.
+                      Los hombres adultos con TDAH suelen luchar con la gestión del tiempo, la 
+                      organización, las finanzas y el mantenimiento de relaciones. Pueden 
+                      tener dificultades laborales por impulsividad o problemas de concentración.
                     </p>
                   </div>
                 </ContentBlock>
@@ -148,7 +170,7 @@ export default function TDAHPage() {
               
               <TabsContent value="mujeres">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">TDAH en Mujeres</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">TDAH en Mujeres Adultas</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
                       Las mujeres con TDAH han sido históricamente infradiagnosticadas. 
