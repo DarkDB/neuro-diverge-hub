@@ -6,6 +6,7 @@ import { SectionTitle } from '@/components/ui/SectionTitle';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAdmin } from '@/hooks/useAdmin';
+import { NewsletterSubscribe } from '@/components/NewsletterSubscribe';
 
 interface Article {
   id: string;
@@ -182,15 +183,7 @@ export default function Diario() {
               </div>
 
               {/* Newsletter */}
-              <div className="p-6 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
-                <h3 className="font-heading font-semibold mb-2">Mantente Informado</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Recibe nuevas publicaciones directamente en tu correo.
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  (Newsletter próximamente)
-                </p>
-              </div>
+              <NewsletterSubscribe variant="card" />
             </div>
           </aside>
         </div>
