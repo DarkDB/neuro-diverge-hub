@@ -95,15 +95,19 @@ export default function TEAPage() {
               Manifestaciones
             </SectionTitle>
             
-            <Tabs defaultValue="adultos" className="w-full">
+            <Tabs defaultValue="hombres" className="w-full">
               <TabsList className="w-full flex flex-wrap h-auto gap-2 bg-transparent p-0 mb-6">
                 <TabsTrigger value="ninos" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Baby className="w-4 h-4" />
-                  Niños/as
+                  Niños
                 </TabsTrigger>
-                <TabsTrigger value="adultos" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <TabsTrigger value="ninas" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Baby className="w-4 h-4" />
+                  Niñas
+                </TabsTrigger>
+                <TabsTrigger value="hombres" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <User className="w-4 h-4" />
-                  Adultos
+                  Hombres
                 </TabsTrigger>
                 <TabsTrigger value="mujeres" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Users className="w-4 h-4" />
@@ -113,35 +117,53 @@ export default function TEAPage() {
               
               <TabsContent value="ninos">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">TEA en la Infancia</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">TEA en Niños</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
-                      En la infancia, las señales pueden incluir retraso en el habla, preferencia 
+                      En la infancia, los niños pueden mostrar retraso en el habla, preferencia 
                       por jugar solos, dificultad para entender las reglas sociales no escritas, 
                       y una conexión intensa con ciertos juguetes u objetos.
                     </p>
                     <p>
-                      Algunos niños muestran habilidades avanzadas en áreas específicas como 
-                      la memoria, las matemáticas o la música, mientras que pueden tener 
-                      dificultades en situaciones sociales no estructuradas.
+                      Suelen mostrar más comportamientos externalizantes como rabietas ante 
+                      cambios de rutina. Los intereses especiales pueden centrarse en trenes, 
+                      dinosaurios, tecnología o sistemas.
+                    </p>
+                  </div>
+                </ContentBlock>
+              </TabsContent>
+
+              <TabsContent value="ninas">
+                <ContentBlock>
+                  <h3 className="font-heading font-semibold text-lg mb-4">TEA en Niñas</h3>
+                  <div className="space-y-4 text-muted-foreground">
+                    <p>
+                      Las niñas autistas suelen desarrollar habilidades de camuflaje desde 
+                      temprano, imitando el comportamiento social de otras niñas. Esto puede 
+                      retrasar significativamente su diagnóstico.
+                    </p>
+                    <p>
+                      Sus intereses especiales pueden parecer más "típicos" (animales, libros, 
+                      celebridades), aunque la intensidad del interés es distintiva. Pueden 
+                      tener una o dos amigas cercanas en lugar de grupos grandes.
                     </p>
                   </div>
                 </ContentBlock>
               </TabsContent>
               
-              <TabsContent value="adultos">
+              <TabsContent value="hombres">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">TEA en la Edad Adulta</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">TEA en Hombres Adultos</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
-                      Muchos adultos autistas han desarrollado estrategias de camuflaje 
-                      (masking) para adaptarse socialmente, lo que puede llevar a agotamiento 
-                      y problemas de salud mental.
+                      Los hombres autistas adultos pueden tener dificultades en entornos 
+                      laborales, especialmente en la dinámica social. Suelen preferir roles 
+                      técnicos o especializados donde sus habilidades sean valoradas.
                     </p>
                     <p>
-                      Las dificultades pueden manifestarse en el entorno laboral (especialmente 
-                      en la dinámica social), en las relaciones personales, y en la gestión 
-                      de la sobrecarga sensorial del día a día.
+                      Pueden tener dificultades en relaciones románticas y amistades debido 
+                      a diferencias en la comunicación. La gestión de la sobrecarga sensorial 
+                      del día a día es un desafío común.
                     </p>
                   </div>
                 </ContentBlock>
@@ -149,7 +171,7 @@ export default function TEAPage() {
               
               <TabsContent value="mujeres">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">TEA en Mujeres</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">TEA en Mujeres Adultas</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
                       Las mujeres autistas han sido históricamente infradiagnosticadas debido 
@@ -157,9 +179,9 @@ export default function TEAPage() {
                       a hombres. Las mujeres suelen hacer más "masking" y camuflaje social.
                     </p>
                     <p>
-                      Sus intereses especiales pueden ser más "socialmente aceptables" (animales, 
-                      psicología, literatura), lo que dificulta la identificación. Muchas 
-                      reciben diagnóstico tardío en la edad adulta.
+                      Este camuflaje constante puede llevar a agotamiento extremo (burnout autista) 
+                      y problemas de salud mental. Muchas reciben diagnóstico tardío en la edad 
+                      adulta, a menudo tras el diagnóstico de un hijo.
                     </p>
                   </div>
                 </ContentBlock>

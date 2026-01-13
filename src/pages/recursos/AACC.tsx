@@ -96,15 +96,19 @@ export default function AACCPage() {
               Manifestaciones
             </SectionTitle>
             
-            <Tabs defaultValue="adultos" className="w-full">
+            <Tabs defaultValue="hombres" className="w-full">
               <TabsList className="w-full flex flex-wrap h-auto gap-2 bg-transparent p-0 mb-6">
                 <TabsTrigger value="ninos" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Baby className="w-4 h-4" />
-                  Niños/as
+                  Niños
                 </TabsTrigger>
-                <TabsTrigger value="adultos" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <TabsTrigger value="ninas" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Baby className="w-4 h-4" />
+                  Niñas
+                </TabsTrigger>
+                <TabsTrigger value="hombres" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <User className="w-4 h-4" />
-                  Adultos
+                  Hombres
                 </TabsTrigger>
                 <TabsTrigger value="mujeres" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Users className="w-4 h-4" />
@@ -114,7 +118,7 @@ export default function AACCPage() {
               
               <TabsContent value="ninos">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">AACC en la Infancia</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">AACC en Niños</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
                       Los niños con AACC pueden mostrar desarrollo temprano del lenguaje, 
@@ -122,28 +126,45 @@ export default function AACCPage() {
                       y dificultad para relacionarse con compañeros de su edad.
                     </p>
                     <p>
-                      Pueden parecer "diferentes" o tener dificultades en el sistema educativo 
-                      tradicional si no reciben la estimulación adecuada. El aburrimiento en 
-                      clase puede manifestarse como problemas de conducta o desinterés.
+                      En el colegio pueden aburrirse y mostrar problemas de conducta o 
+                      desinterés si no reciben la estimulación adecuada. Suelen preferir 
+                      la compañía de adultos o niños mayores.
+                    </p>
+                  </div>
+                </ContentBlock>
+              </TabsContent>
+
+              <TabsContent value="ninas">
+                <ContentBlock>
+                  <h3 className="font-heading font-semibold text-lg mb-4">AACC en Niñas</h3>
+                  <div className="space-y-4 text-muted-foreground">
+                    <p>
+                      Las niñas con AACC suelen ser menos identificadas que los niños. 
+                      Pueden ocultar sus capacidades para encajar socialmente desde temprana 
+                      edad, mostrándose más conformistas en el entorno escolar.
+                    </p>
+                    <p>
+                      La intensidad emocional puede manifestarse en alta sensibilidad y 
+                      perfeccionismo extremo. Pueden desarrollar ansiedad por el deseo 
+                      de cumplir expectativas sociales mientras suprimen su potencial.
                     </p>
                   </div>
                 </ContentBlock>
               </TabsContent>
               
-              <TabsContent value="adultos">
+              <TabsContent value="hombres">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">AACC en la Edad Adulta</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">AACC en Hombres Adultos</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
-                      Muchos adultos con AACC nunca fueron identificados en la infancia. 
-                      Pueden experimentar sensación de ser "diferentes", dificultad para 
-                      encajar, múltiples intereses que cambian frecuentemente, o frustración 
-                      con entornos laborales poco estimulantes.
+                      Los hombres adultos con AACC pueden experimentar sensación de ser 
+                      "diferentes", dificultad para encajar, múltiples intereses que cambian 
+                      frecuentemente, o frustración con entornos laborales poco estimulantes.
                     </p>
                     <p>
-                      La intensidad emocional y la sensibilidad pueden llevar a problemas 
-                      de ansiedad o depresión si no se comprenden estas características 
-                      como parte de las AACC.
+                      La intensidad emocional puede manifestarse en pasión extrema por 
+                      proyectos o causas. Pueden tener dificultades con trabajos rutinarios 
+                      y buscar constantemente nuevos retos intelectuales.
                     </p>
                   </div>
                 </ContentBlock>
@@ -151,7 +172,7 @@ export default function AACCPage() {
               
               <TabsContent value="mujeres">
                 <ContentBlock>
-                  <h3 className="font-heading font-semibold text-lg mb-4">AACC en Mujeres</h3>
+                  <h3 className="font-heading font-semibold text-lg mb-4">AACC en Mujeres Adultas</h3>
                   <div className="space-y-4 text-muted-foreground">
                     <p>
                       Las mujeres con AACC han sido históricamente infraidentificadas. 
