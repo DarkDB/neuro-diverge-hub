@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Brain, Heart } from 'lucide-react';
+import { Brain, Heart, Instagram } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -15,6 +15,17 @@ export function Footer() {
             <p className="text-sm text-muted-foreground max-w-xs">
               Un espacio seguro para explorar, comprender y celebrar la neurodiversidad.
             </p>
+            <div className="flex items-center gap-3">
+              <a 
+                href="https://instagram.com/espacioneurodivergente_oficial" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors focus-ring rounded p-1"
+                aria-label="Síguenos en Instagram"
+              >
+                <Instagram className="w-5 h-5" />
+              </a>
+            </div>
           </div>
 
           {/* Quick Links */}

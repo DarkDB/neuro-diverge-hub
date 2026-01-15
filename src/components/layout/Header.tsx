@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon, Brain } from 'lucide-react';
+import { Menu, X, Sun, Moon, Brain, Settings } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAdmin } from '@/hooks/useAdmin';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
 const navItems = [
   { href: '/que-es-neurodivergencia', label: '¿Qué es la Neurodivergencia?' },
   { href: '/autodescubrimiento', label: 'Mi Viaje de Autodescubrimiento' },
@@ -16,6 +17,8 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
+  const { user } = useAuth();
+  const { isAdmin } = useAdmin();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -57,6 +60,20 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
+            {/* Admin Link */}
+            {user && isAdmin && (
+              <Link to="/admin/articles">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="focus-ring"
+                  aria-label="Panel de administración"
+                >
+                  <Settings className="h-5 w-5" aria-hidden="true" />
+                </Button>
+              </Link>
+            )}
+
             {/* Theme Toggle */}
             <Button
               variant="ghost"
