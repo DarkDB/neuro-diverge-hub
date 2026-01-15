@@ -27,6 +27,8 @@ import NotFound from "./pages/NotFound";
 import ArticlesDashboard from "./pages/admin/ArticlesDashboard";
 import ArticleEditor from "./pages/admin/ArticleEditor";
 import ArticleView from "./pages/ArticleView";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCanceled from "./pages/PaymentCanceled";
 import TDAHAdultosTest from "./pages/tests/TDAHAdultos";
 import TEAAQ10Test from "./pages/tests/TEAAQ10";
 import DislexiaTest from "./pages/tests/Dislexia";
@@ -65,9 +67,11 @@ const App = () => (
               <Route path="/tests/dispraxia" element={<DispraxiaTest />} />
               <Route path="/diario" element={<Diario />} />
               <Route path="/diario/:slug" element={<ArticleView />} />
-              <Route path="/admin/articulos" element={<ArticlesDashboard />} />
-              <Route path="/admin/articulos/nuevo" element={<ArticleEditor />} />
-              <Route path="/admin/articulos/:id" element={<ArticleEditor />} />
+              <Route path="/admin/articles" element={<ArticlesDashboard />} />
+              <Route path="/admin/articles/new" element={<ArticleEditor />} />
+              <Route path="/admin/articles/:id" element={<ArticleEditor />} />
+              <Route path="/pago-exitoso" element={<PaymentSuccess />} />
+              <Route path="/pago-cancelado" element={<PaymentCanceled />} />
               <Route path="/privacidad" element={<Privacidad />} />
               <Route path="/cookies" element={<Cookies />} />
               <Route path="/aviso-legal" element={<AvisoLegal />} />

@@ -58,7 +58,7 @@ export default function ArticleEditor() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth?redirect=/admin/articulos');
+      navigate('/auth?redirect=/admin/articles');
       return;
     }
     
@@ -101,7 +101,7 @@ export default function ArticleEditor() {
     } catch (error) {
       console.error('Error fetching article:', error);
       toast.error('Error al cargar el artículo');
-      navigate('/admin/articulos');
+      navigate('/admin/articles');
     } finally {
       setIsLoading(false);
     }
@@ -171,7 +171,7 @@ export default function ArticleEditor() {
         toast.success('Artículo creado correctamente');
       }
 
-      navigate('/admin/articulos');
+      navigate('/admin/articles');
     } catch (error: any) {
       console.error('Error saving article:', error);
       if (error.code === '23505') {
@@ -202,7 +202,7 @@ export default function ArticleEditor() {
         {/* Header */}
         <div className="mb-8">
           <Link 
-            to="/admin/articulos" 
+            to="/admin/articles" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -378,7 +378,7 @@ export default function ArticleEditor() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate('/admin/articulos')}
+              onClick={() => navigate('/admin/articles')}
             >
               Cancelar
             </Button>
