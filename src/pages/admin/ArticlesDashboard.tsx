@@ -61,7 +61,7 @@ export default function ArticlesDashboard() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth?redirect=/admin/articulos');
+      navigate('/auth?redirect=/admin/articles');
       return;
     }
     
@@ -168,7 +168,7 @@ export default function ArticlesDashboard() {
                 Administra los artículos del diario
               </p>
             </div>
-            <Button onClick={() => navigate('/admin/articulos/nuevo')}>
+            <Button onClick={() => navigate('/admin/articles/new')}>
               <Plus className="w-4 h-4 mr-2" />
               Nuevo Artículo
             </Button>
@@ -202,7 +202,7 @@ export default function ArticlesDashboard() {
                 {searchQuery ? 'No se encontraron artículos con ese criterio' : 'Comienza creando tu primer artículo'}
               </p>
               {!searchQuery && (
-                <Button onClick={() => navigate('/admin/articulos/nuevo')}>
+                <Button onClick={() => navigate('/admin/articles/new')}>
                   <Plus className="w-4 h-4 mr-2" />
                   Crear Artículo
                 </Button>
@@ -260,7 +260,7 @@ export default function ArticlesDashboard() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => navigate(`/admin/articulos/${article.id}`)}
+                          onClick={() => navigate(`/admin/articles/${article.id}`)}
                           title="Editar"
                         >
                           <Edit className="w-4 h-4" />

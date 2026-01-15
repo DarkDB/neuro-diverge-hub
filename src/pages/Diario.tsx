@@ -82,7 +82,7 @@ export default function Diario() {
             {isAdmin && (
               <div className="mt-6">
                 <Button asChild variant="outline">
-                  <Link to="/admin/articulos">
+                  <Link to="/admin/articles">
                     <Settings className="w-4 h-4 mr-2" />
                     Gestionar Artículos
                   </Link>

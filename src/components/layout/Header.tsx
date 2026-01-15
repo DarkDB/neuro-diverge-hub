@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon, Brain, Settings } from 'lucide-react';
+import { Menu, X, Sun, Moon, Brain, Settings, LogIn, LogOut, User } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/hooks/useAuth';
@@ -60,16 +60,42 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            {/* Admin Link */}
-            {user && isAdmin && (
-              <Link to="/admin/articles">
+            {/* User Auth */}
+            {user ? (
+              <>
+                {/* Admin Link */}
+                {isAdmin && (
+                  <Link to="/admin/articles">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="focus-ring"
+                      aria-label="Panel de administración"
+                    >
+                      <Settings className="h-5 w-5" aria-hidden="true" />
+                    </Button>
+                  </Link>
+                )}
+                <Link to="/auth">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="focus-ring"
+                    aria-label="Mi cuenta"
+                  >
+                    <User className="h-5 w-5" aria-hidden="true" />
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <Link to="/auth">
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="focus-ring"
-                  aria-label="Panel de administración"
+                  size="sm"
+                  className="focus-ring gap-2"
                 >
-                  <Settings className="h-5 w-5" aria-hidden="true" />
+                  <LogIn className="h-4 w-4" aria-hidden="true" />
+                  <span className="hidden sm:inline">Entrar</span>
                 </Button>
               </Link>
             )}
