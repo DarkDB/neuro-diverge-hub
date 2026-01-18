@@ -154,9 +154,14 @@ export function useScreeningSession() {
     setSessionId(null);
   }, []);
 
+  const setSessionIdManual = useCallback((id: string) => {
+    setSessionId(id);
+  }, []);
+
   return {
     sessionId,
     isSaving,
+    setSessionIdManual,
     createSession,
     updateSession,
     savePhase1,

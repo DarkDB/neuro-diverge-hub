@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { CheckCircle, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function PaymentSuccess() {
@@ -10,6 +10,7 @@ export default function PaymentSuccess() {
   const navigate = useNavigate();
   const [isVerifying, setIsVerifying] = useState(true);
   const [verified, setVerified] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const productType = searchParams.get('product');
   const sessionId = searchParams.get('session_id');
@@ -29,11 +30,15 @@ export default function PaymentSuccess() {
 
         if (error) {
           console.error('Error verifying payment:', error);
+          setError('No se pudo verificar el pago. Por favor, contacta con soporte.');
+        } else if (data?.paid) {
+          setVerified(true);
         } else {
-          setVerified(data?.paid || false);
+          setError('El pago no se ha completado correctamente.');
         }
       } catch (err) {
         console.error('Error verifying payment:', err);
+        setError('Error al verificar el pago.');
       } finally {
         setIsVerifying(false);
       }
@@ -63,7 +68,18 @@ export default function PaymentSuccess() {
                 Verificando tu pago...
               </h1>
             </div>
-          ) : (
+          ) : error ? (
+            <div className="space-y-6">
+              <AlertCircle className="w-20 h-20 text-destructive mx-auto" />
+              <h1 className="text-3xl font-heading font-bold text-foreground">
+                Error en la verificación
+              </h1>
+              <p className="text-muted-foreground">{error}</p>
+              <Button onClick={() => navigate('/')} size="lg" variant="outline">
+                Volver al inicio
+              </Button>
+            </div>
+          ) : verified ? (
             <div className="space-y-6">
               <CheckCircle className="w-20 h-20 text-green-500 mx-auto" />
               <h1 className="text-3xl font-heading font-bold text-foreground">
@@ -79,7 +95,7 @@ export default function PaymentSuccess() {
                 Continuar <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </Layout>

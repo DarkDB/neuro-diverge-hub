@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Compass, Lock, Sparkles, FileText, Mail, ArrowRight, AlertCircle, Loader2, User, Calendar, CheckCircle2, LogIn, Download } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { SectionTitle } from '@/components/ui/SectionTitle';
@@ -14,7 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useScreeningSession } from '@/hooks/useScreeningSession';
 import { supabase } from '@/integrations/supabase/client';
 
-type Step = 'intro' | 'profile' | 'phase1' | 'phase1-teaser' | 'register-prompt' | 'phase1-payment' | 'phase2' | 'phase2-questions' | 'phase3' | 'complete';
+type Step = 'intro' | 'profile' | 'phase1' | 'phase1-teaser' | 'register-prompt' | 'phase1-payment' | 'phase2-loading' | 'phase2' | 'phase2-questions' | 'phase3' | 'complete';
 
 interface RespuestaHistorial {
   pregunta: string;
@@ -57,11 +57,25 @@ interface InformeFinal {
 
 export default function Autodescubrimiento() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState<Step>('intro');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
-  const { createSession, savePhase1, savePhase2, completeSession, resetSession, isSaving } = useScreeningSession();
+  const { sessionId, setSessionIdManual, createSession, savePhase1, savePhase2, completeSession, resetSession, isSaving } = useScreeningSession();
+
+  // Handle return from payment
+  useEffect(() => {
+    const sessionFromUrl = searchParams.get('session');
+    const continueFlow = searchParams.get('continue');
+    
+    if (sessionFromUrl && continueFlow === 'true' && user) {
+      setSessionIdManual(sessionFromUrl);
+      setStep('phase2-loading');
+      // Clear URL params
+      navigate('/autodescubrimiento', { replace: true });
+    }
+  }, [searchParams, user, navigate, setSessionIdManual]);
 
   // Profile data
   const [edad, setEdad] = useState('');
@@ -240,6 +254,115 @@ export default function Autodescubrimiento() {
     }
   };
 
+  // Handle Stripe payment
+  const handleStripePayment = async () => {
+    if (!sessionId) {
+      toast({
+        title: 'Error',
+        description: 'No se encontró la sesión. Por favor, inténtalo de nuevo.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: { 
+          product_type: 'screening',
+          session_id: sessionId,
+        },
+      });
+
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      if (!data?.url) throw new Error('No se recibió URL de pago');
+
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+    } catch (error) {
+      console.error('Error creating payment:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'No se pudo iniciar el pago.',
+        variant: 'destructive',
+      });
+      setIsLoading(false);
+    }
+  };
+
+  // Load session data and proceed to Phase 2
+  const loadSessionAndProceed = async () => {
+    if (!sessionId || !user) return;
+
+    setIsLoading(true);
+    try {
+      // Fetch session data from database
+      const { data: session, error } = await supabase
+        .from('screening_sessions')
+        .select('*')
+        .eq('id', sessionId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw new Error(error.message);
+      if (!session) throw new Error('Sesión no encontrada');
+      if (!session.paid) {
+        toast({
+          title: 'Pago no verificado',
+          description: 'El pago no se ha completado correctamente.',
+          variant: 'destructive',
+        });
+        setStep('phase1-payment');
+        return;
+      }
+
+      // Restore session data
+      setEdad(session.edad);
+      setGenero(session.genero);
+      setDestinatario(session.destinatario);
+      
+      const fase1Respuestas = session.fase1_respuestas as { pregunta: string; respuesta: string }[] | null;
+      if (fase1Respuestas) {
+        setPhase1Questions(fase1Respuestas.map(r => r.pregunta));
+        setPhase1Answers(fase1Respuestas.map(r => r.respuesta));
+      }
+
+      // Generate Phase 2 analysis
+      const historialRespuestas: RespuestaHistorial[] = fase1Respuestas || [];
+
+      console.log('Calling screening-phase2 function...');
+      const { data, error: phase2Error } = await supabase.functions.invoke('screening-phase2', {
+        body: { edad: session.edad, genero: session.genero, historialRespuestas },
+      });
+
+      if (phase2Error) throw new Error(phase2Error.message);
+      if (data?.error) throw new Error(data.error);
+
+      setAnalisisPreliminar(data.analisis || null);
+      setPhase2Questions(data.preguntas || []);
+      setPhase2Answers(Array(data.preguntas?.length || 0).fill(''));
+      setStep('phase2');
+    } catch (error) {
+      console.error('Error loading session:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'No se pudo cargar la sesión.',
+        variant: 'destructive',
+      });
+      setStep('intro');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Effect to load session when returning from payment
+  useEffect(() => {
+    if (step === 'phase2-loading' && sessionId && user) {
+      loadSessionAndProceed();
+    }
+  }, [step, sessionId, user]);
+
   const handlePaymentAndPhase2 = async () => {
     if (!email.trim()) {
       toast({
@@ -260,43 +383,8 @@ export default function Autodescubrimiento() {
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      // Build historial from phase 1
-      const historialRespuestas: RespuestaHistorial[] = phase1Questions.map((pregunta, i) => ({
-        pregunta,
-        respuesta: phase1Answers[i],
-      }));
-
-      console.log('Calling screening-phase2 function...');
-      const { data, error } = await supabase.functions.invoke('screening-phase2', {
-        body: { edad, genero, historialRespuestas },
-      });
-
-      if (error) {
-        console.error('Phase 2 error:', error);
-        throw new Error(error.message || 'Error al generar el análisis');
-      }
-
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
-      setAnalisisPreliminar(data.analisis || null);
-      setPhase2Questions(data.preguntas || []);
-      setPhase2Answers(Array(data.preguntas?.length || 0).fill(''));
-      setStep('phase2');
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'No se pudo generar el análisis.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    // Proceed to Stripe payment
+    await handleStripePayment();
   };
 
   const handlePhase2AnswerChange = (index: number, value: string) => {
@@ -918,7 +1006,7 @@ export default function Autodescubrimiento() {
                 </div>
                 <p className="text-muted-foreground">
                   Has respondido todas las preguntas del cribado inicial. 
-                  Para continuar con el análisis y las preguntas de profundización, necesitamos tu email.
+                  Para continuar con el análisis completo, realiza el pago seguro con Stripe.
                 </p>
               </ContentBlock>
 
@@ -950,35 +1038,26 @@ export default function Autodescubrimiento() {
                   </div>
 
                   <div className="max-w-sm mx-auto space-y-4">
-                    <div>
-                      <Label htmlFor="email">Tu email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="tu@email.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                      />
-                    </div>
                     <Button 
-                      onClick={handlePaymentAndPhase2} 
-                      disabled={isLoading}
+                      onClick={handleStripePayment} 
+                      disabled={isLoading || !sessionId}
                       className="w-full gap-2"
+                      size="lg"
                     >
                       {isLoading ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          Generando análisis...
+                          Redirigiendo a pago...
                         </>
                       ) : (
                         <>
-                          Continuar con Análisis
-                          <ArrowRight className="w-4 h-4" />
+                          <Lock className="w-4 h-4" />
+                          Pagar 5€ con Stripe
                         </>
                       )}
                     </Button>
                     <p className="text-xs text-muted-foreground">
-                      * Pago con Stripe próximamente. Por ahora, demo gratuita.
+                      Pago seguro procesado por Stripe. Tu información de pago está protegida.
                     </p>
                   </div>
                 </div>
@@ -989,6 +1068,23 @@ export default function Autodescubrimiento() {
                   Volver al resumen
                 </Button>
               </div>
+            </div>
+          )}
+
+          {/* Phase 2 Loading */}
+          {step === 'phase2-loading' && (
+            <div className="space-y-8 animate-fade-in">
+              <ContentBlock>
+                <div className="text-center py-12 space-y-4">
+                  <Loader2 className="w-12 h-12 text-primary mx-auto animate-spin" />
+                  <h2 className="font-heading font-semibold text-xl">
+                    Preparando tu análisis...
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Estamos cargando tus respuestas y generando el análisis preliminar.
+                  </p>
+                </div>
+              </ContentBlock>
             </div>
           )}
 
