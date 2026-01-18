@@ -79,9 +79,14 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || "https://espacioneurodivergente.com";
     
     // Determine success URL based on product type
-    let successUrl = `${origin}/pago-exitoso?product=${product_type}`;
-    if (session_id) successUrl += `&session_id=${session_id}`;
-    if (test_type) successUrl += `&test_type=${test_type}`;
+    let successUrl: string;
+    if (product_type === 'test_premium' && test_type) {
+      // Redirect back to the test page with payment success params
+      successUrl = `${origin}/tests/${test_type}?payment_success=true&test_type=${test_type}`;
+    } else {
+      successUrl = `${origin}/pago-exitoso?product=${product_type}`;
+      if (session_id) successUrl += `&session_id=${session_id}`;
+    }
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
