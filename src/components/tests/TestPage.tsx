@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, Loader2, Lock, FileText, Download } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { ContentBlock } from '@/components/ui/ContentBlock';
@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface TestQuestion {
   id: number;
@@ -41,12 +42,52 @@ interface TestPageProps {
 }
 
 export function TestPage({ config }: TestPageProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState<'intro' | 'questions' | 'results'>('intro');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [result, setResult] = useState<TestResult | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
+  const [isPremiumUnlocked, setIsPremiumUnlocked] = useState(false);
+  const [loadingPayment, setLoadingPayment] = useState(false);
+  const [premiumPdfUrl, setPremiumPdfUrl] = useState<string | null>(null);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
+
+  // Check for payment success on mount
+  useEffect(() => {
+    const paymentSuccess = searchParams.get('payment_success');
+    const testType = searchParams.get('test_type');
+    
+    if (paymentSuccess === 'true' && testType === config.id) {
+      // Restore result from sessionStorage
+      const savedResult = sessionStorage.getItem(`test_result_${config.id}`);
+      const savedAnswers = sessionStorage.getItem(`test_answers_${config.id}`);
+      
+      if (savedResult && savedAnswers) {
+        setResult(JSON.parse(savedResult));
+        setAnswers(JSON.parse(savedAnswers));
+        setCurrentStep('results');
+        setIsPremiumUnlocked(true);
+        toast.success('¡Pago completado! Generando tu análisis premium...');
+        
+        // Clean up URL params
+        setSearchParams({});
+        
+        // Clean up session storage
+        sessionStorage.removeItem(`test_result_${config.id}`);
+        sessionStorage.removeItem(`test_answers_${config.id}`);
+      }
+    }
+  }, [searchParams, config.id, setSearchParams]);
+
+  // Auto-generate premium PDF when unlocked
+  useEffect(() => {
+    if (isPremiumUnlocked && result && !premiumPdfUrl && !generatingPdf) {
+      generatePremiumPdf();
+    }
+  }, [isPremiumUnlocked, result]);
 
   const handleAnswer = (value: number) => {
     setAnswers((prev) => ({
@@ -100,12 +141,92 @@ export function TestPage({ config }: TestPageProps) {
     }
   };
 
+  const handlePremiumPayment = async () => {
+    if (!user) {
+      toast.error('Debes iniciar sesión para obtener el análisis premium');
+      return;
+    }
+
+    if (!result) return;
+
+    setLoadingPayment(true);
+    try {
+      // Save result to sessionStorage before redirecting
+      sessionStorage.setItem(`test_result_${config.id}`, JSON.stringify(result));
+      sessionStorage.setItem(`test_answers_${config.id}`, JSON.stringify(answers));
+
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          product_type: 'test_premium',
+          test_type: config.id,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Error creating payment:', error);
+      toast.error('Error al procesar el pago. Inténtalo de nuevo.');
+      sessionStorage.removeItem(`test_result_${config.id}`);
+      sessionStorage.removeItem(`test_answers_${config.id}`);
+    } finally {
+      setLoadingPayment(false);
+    }
+  };
+
+  const generatePremiumPdf = async () => {
+    if (!result) return;
+
+    setGeneratingPdf(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-pdf', {
+        body: {
+          type: 'test_premium',
+          testName: config.fullName,
+          testId: config.id,
+          puntuacion: result.puntuacion,
+          maxPuntuacion: result.maxPuntuacion,
+          banda: result.banda,
+          descripcion: result.descripcion,
+          answers: answers,
+          questions: config.questions,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.pdfBase64) {
+        // Convert base64 to blob and create download URL
+        const byteCharacters = atob(data.pdfBase64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        setPremiumPdfUrl(url);
+        toast.success('¡Tu informe premium está listo para descargar!');
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Error al generar el PDF. Inténtalo de nuevo.');
+    } finally {
+      setGeneratingPdf(false);
+    }
+  };
+
   const restartTest = () => {
     setCurrentStep('intro');
     setCurrentQuestion(0);
     setAnswers({});
     setResult(null);
     setAiAnalysis(null);
+    setIsPremiumUnlocked(false);
+    setPremiumPdfUrl(null);
   };
 
   return (
@@ -258,17 +379,18 @@ export function TestPage({ config }: TestPageProps) {
                 <p className="text-muted-foreground">{result.descripcion}</p>
               </ContentBlock>
 
-              {/* AI Analysis Section */}
+              {/* Free AI Analysis Section */}
               <ContentBlock>
-                <h3 className="font-heading font-semibold text-lg mb-4">Análisis Personalizado</h3>
+                <h3 className="font-heading font-semibold text-lg mb-4">Análisis Básico (Gratuito)</h3>
                 {!aiAnalysis ? (
                   <div className="text-center py-4">
                     <p className="text-muted-foreground mb-4">
-                      Obtén un análisis detallado de tus resultados generado por IA.
+                      Obtén un análisis breve de tus resultados generado por IA.
                     </p>
                     <Button
                       onClick={handleGetAnalysis}
                       disabled={loadingAnalysis}
+                      variant="outline"
                       className="gap-2"
                     >
                       {loadingAnalysis ? (
@@ -288,6 +410,99 @@ export function TestPage({ config }: TestPageProps) {
                         {paragraph}
                       </p>
                     ))}
+                  </div>
+                )}
+              </ContentBlock>
+
+              {/* Premium Analysis Section */}
+              <ContentBlock className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-semibold text-lg">Análisis Premium</h3>
+                    <p className="text-sm text-muted-foreground">Informe detallado en PDF por 1€</p>
+                  </div>
+                </div>
+                
+                {isPremiumUnlocked ? (
+                  <div className="space-y-4">
+                    {generatingPdf ? (
+                      <div className="flex items-center justify-center gap-3 py-6">
+                        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                        <span className="text-muted-foreground">Generando tu informe premium...</span>
+                      </div>
+                    ) : premiumPdfUrl ? (
+                      <div className="text-center py-4">
+                        <CheckCircle2 className="w-12 h-12 text-success mx-auto mb-3" />
+                        <p className="text-foreground font-medium mb-4">¡Tu informe está listo!</p>
+                        <Button asChild className="gap-2">
+                          <a href={premiumPdfUrl} download={`informe-${config.id}.pdf`}>
+                            <Download className="w-4 h-4" />
+                            Descargar Informe PDF
+                          </a>
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button onClick={generatePremiumPdf} className="w-full gap-2">
+                        <FileText className="w-4 h-4" />
+                        Generar Informe PDF
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        Análisis exhaustivo de tus respuestas
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        Interpretación profesional de resultados
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        Recomendaciones personalizadas
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        PDF descargable para compartir con profesionales
+                      </li>
+                    </ul>
+                    
+                    {!user ? (
+                      <div className="text-center">
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Inicia sesión para obtener el análisis premium
+                        </p>
+                        <Button asChild variant="outline" className="gap-2">
+                          <Link to="/auth">
+                            <Lock className="w-4 h-4" />
+                            Iniciar Sesión
+                          </Link>
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button 
+                        onClick={handlePremiumPayment} 
+                        disabled={loadingPayment}
+                        className="w-full gap-2"
+                      >
+                        {loadingPayment ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Procesando...
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="w-4 h-4" />
+                            Obtener por 1€
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </div>
                 )}
               </ContentBlock>
