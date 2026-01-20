@@ -68,6 +68,51 @@ export type Database = {
         }
         Relationships: []
       }
+      downloadable_resources: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          download_count: number | null
+          file_size_bytes: number | null
+          file_type: string
+          file_url: string
+          id: string
+          is_active: boolean | null
+          neurodivergence_type: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          download_count?: number | null
+          file_size_bytes?: number | null
+          file_type: string
+          file_url: string
+          id?: string
+          is_active?: boolean | null
+          neurodivergence_type?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          download_count?: number | null
+          file_size_bytes?: number | null
+          file_type?: string
+          file_url?: string
+          id?: string
+          is_active?: boolean | null
+          neurodivergence_type?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           email: string

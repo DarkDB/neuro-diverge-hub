@@ -4,6 +4,7 @@ import { Layout } from '@/components/layout/Layout';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { ContentBlock } from '@/components/ui/ContentBlock';
 import { Button } from '@/components/ui/button';
+import { DownloadableResourcesSection } from '@/components/resources/DownloadableResourcesSection';
 
 const neurodivergencias = [
   {
@@ -107,6 +108,9 @@ export default function Recursos() {
             ))}
           </div>
         </section>
+
+        {/* Downloadable Resources Section */}
+        <DownloadableResourcesSection />
 
         {/* Tests Section */}
         <section className="mb-16">
