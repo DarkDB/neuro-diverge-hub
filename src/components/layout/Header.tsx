@@ -65,7 +65,7 @@ export function Header() {
               <>
                 {/* Admin Link */}
                 {isAdmin && (
-                  <Link to="/admin/articles">
+                  <Link to="/admin">
                     <Button
                       variant="ghost"
                       size="icon"

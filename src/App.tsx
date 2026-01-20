@@ -24,7 +24,7 @@ import Cookies from "./pages/Cookies";
 import AvisoLegal from "./pages/AvisoLegal";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import ArticlesDashboard from "./pages/admin/ArticlesDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import ArticleEditor from "./pages/admin/ArticleEditor";
 import ArticleView from "./pages/ArticleView";
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -67,7 +67,8 @@ const App = () => (
               <Route path="/tests/dispraxia" element={<DispraxiaTest />} />
               <Route path="/diario" element={<Diario />} />
               <Route path="/diario/:slug" element={<ArticleView />} />
-              <Route path="/admin/articles" element={<ArticlesDashboard />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/articles" element={<AdminDashboard />} />
               <Route path="/admin/articles/new" element={<ArticleEditor />} />
               <Route path="/admin/articles/:id" element={<ArticleEditor />} />
               <Route path="/pago-exitoso" element={<PaymentSuccess />} />
