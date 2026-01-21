@@ -422,7 +422,7 @@ export function TestPage({ config }: TestPageProps) {
                   </div>
                   <div>
                     <h3 className="font-heading font-semibold text-lg">Análisis Premium</h3>
-                    <p className="text-sm text-muted-foreground">Informe detallado en PDF por 1€</p>
+                    <p className="text-sm text-muted-foreground">Informe detallado en PDF por 0,99€</p>
                   </div>
                 </div>
                 
@@ -498,7 +498,7 @@ export function TestPage({ config }: TestPageProps) {
                         ) : (
                           <>
                             <Lock className="w-4 h-4" />
-                            Obtener por 1€
+                            Obtener por 0,99€
                           </>
                         )}
                       </Button>

@@ -1052,7 +1052,7 @@ export default function Autodescubrimiento() {
                       ) : (
                         <>
                           <Lock className="w-4 h-4" />
-                          Pagar 5€ con Stripe
+                          Pagar 4,99€ con Stripe
                         </>
                       )}
                     </Button>
