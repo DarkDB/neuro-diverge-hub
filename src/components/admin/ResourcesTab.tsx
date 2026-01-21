@@ -80,7 +80,7 @@ const CATEGORIES = [
 ];
 
 const NEURODIVERGENCE_TYPES = [
-  { value: '', label: 'Ninguno (General)' },
+  { value: 'none', label: 'Ninguno (General)' },
   { value: 'TDAH', label: 'TDAH' },
   { value: 'TEA', label: 'TEA' },
   { value: 'AACC', label: 'AACC' },
@@ -125,7 +125,7 @@ export function ResourcesTab() {
     title: '',
     description: '',
     category: 'general',
-    neurodivergence_type: '',
+    neurodivergence_type: 'none',
     file: null as File | null,
   });
 
@@ -188,7 +188,7 @@ export function ResourcesTab() {
           file_type: form.file.type || fileExt,
           file_url: urlData.publicUrl,
           file_size_bytes: form.file.size,
-          neurodivergence_type: form.neurodivergence_type || null,
+          neurodivergence_type: form.neurodivergence_type === 'none' ? null : form.neurodivergence_type,
           is_active: true,
         });
 
@@ -200,7 +200,7 @@ export function ResourcesTab() {
         title: '',
         description: '',
         category: 'general',
-        neurodivergence_type: '',
+        neurodivergence_type: 'none',
         file: null,
       });
       if (fileInputRef.current) {
