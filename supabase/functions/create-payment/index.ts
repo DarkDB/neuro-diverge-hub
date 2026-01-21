@@ -10,12 +10,12 @@ const corsHeaders = {
 // Product configuration
 const PRODUCTS = {
   screening: {
-    price_id: "price_1SplqVCFeyQSOhG10j5PHWUM", // 4,99€ - Análisis completo cuestionario
-    product_id: "prod_TnMZhbLynrjfgt",
+    price_id: "price_1Ss5fZ2HU8ke0Kv1ErMiub9B", // 4,99€ - Análisis completo cuestionario (PRODUCCIÓN)
+    product_id: "prod_screening_live",
   },
   test_premium: {
-    price_id: "price_1SplslCFeyQSOhG17nqp8AUQ", // 0,99€ - Análisis premium test
-    product_id: "prod_TnMbpyPlMjn0es",
+    price_id: "price_1Ss5g82HU8ke0Kv1aB1zvLLz", // 0,99€ - Análisis premium test (PRODUCCIÓN)
+    product_id: "prod_test_premium_live",
   },
 };
 
