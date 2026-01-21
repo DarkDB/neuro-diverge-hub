@@ -114,7 +114,7 @@ export default function Tests() {
                   <Lock className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-medium">Premium (1€)</h3>
+                  <h3 className="font-medium">Premium (0,99€)</h3>
                   <p className="text-sm text-muted-foreground">Análisis detallado en PDF por IA</p>
                 </div>
               </div>
