@@ -64,8 +64,27 @@ export function DownloadableResourceCard({
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
   const [imageError, setImageError] = useState(false);
 
-  const handleDownload = () => {
-    window.open(fileUrl, '_blank');
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(fileUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      // Extract filename from URL or use title
+      const urlParts = fileUrl.split('/');
+      const originalFilename = urlParts[urlParts.length - 1];
+      const extension = originalFilename.split('.').pop() || '';
+      link.download = `${title}.${extension}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      // Fallback to opening in new tab
+      window.open(fileUrl, '_blank');
+    }
   };
 
   const toggleAudio = () => {
