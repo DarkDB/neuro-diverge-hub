@@ -15,15 +15,16 @@ export function Footer() {
             <p className="text-sm text-muted-foreground max-w-xs">
               Un espacio seguro para explorar, comprender y celebrar la neurodiversidad.
             </p>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <a 
                 href="https://instagram.com/espacioneurodivergente_oficial" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors focus-ring rounded p-1"
+                className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors focus-ring rounded p-1"
                 aria-label="Síguenos en Instagram"
               >
                 <Instagram className="w-5 h-5" />
+                <span className="text-sm">@espacioneurodivergente_oficial</span>
               </a>
             </div>
           </div>
