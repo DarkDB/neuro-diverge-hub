@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/hooks/useAuth';
@@ -253,15 +254,11 @@ export default function ArticleEditor() {
 
           {/* Content */}
           <div className="space-y-2">
-            <Label htmlFor="content">Contenido *</Label>
-            <Textarea
-              id="content"
-              value={form.content}
-              onChange={(e) => setForm(prev => ({ ...prev, content: e.target.value }))}
-              placeholder="El contenido completo del artículo (soporta Markdown)"
-              rows={15}
-              className="font-mono text-sm"
-              required
+            <Label>Contenido *</Label>
+            <RichTextEditor
+              content={form.content}
+              onChange={(content) => setForm(prev => ({ ...prev, content }))}
+              placeholder="Escribe el contenido del artículo..."
             />
           </div>
 
