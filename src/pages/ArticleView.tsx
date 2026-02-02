@@ -68,114 +68,30 @@ export default function ArticleView() {
     });
   };
 
-  // Simple markdown-like rendering
+  // Render HTML content from rich text editor
   const renderContent = (content: string) => {
-    const lines = content.split('\n');
-    const elements: JSX.Element[] = [];
-    let inCodeBlock = false;
-    let codeContent: string[] = [];
-    let codeLanguage = '';
-
-    lines.forEach((line, index) => {
-      // Code block handling
-      if (line.startsWith('```')) {
-        if (!inCodeBlock) {
-          inCodeBlock = true;
-          codeLanguage = line.slice(3).trim();
-          codeContent = [];
-        } else {
-          inCodeBlock = false;
-          elements.push(
-            <pre key={index} className="bg-muted p-4 rounded-lg overflow-x-auto my-4">
-              <code className="text-sm">{codeContent.join('\n')}</code>
-            </pre>
-          );
-        }
-        return;
-      }
-
-      if (inCodeBlock) {
-        codeContent.push(line);
-        return;
-      }
-
-      // Headings
-      if (line.startsWith('### ')) {
-        elements.push(
-          <h3 key={index} className="text-xl font-heading font-semibold mt-8 mb-4">
-            {line.slice(4)}
-          </h3>
-        );
-      } else if (line.startsWith('## ')) {
-        elements.push(
-          <h2 key={index} className="text-2xl font-heading font-bold mt-10 mb-4">
-            {line.slice(3)}
-          </h2>
-        );
-      } else if (line.startsWith('# ')) {
-        elements.push(
-          <h1 key={index} className="text-3xl font-heading font-bold mt-10 mb-6">
-            {line.slice(2)}
-          </h1>
-        );
-      }
-      // Blockquote
-      else if (line.startsWith('> ')) {
-        elements.push(
-          <blockquote key={index} className="border-l-4 border-primary pl-4 italic my-4 text-muted-foreground">
-            {line.slice(2)}
-          </blockquote>
-        );
-      }
-      // Unordered list
-      else if (line.startsWith('- ') || line.startsWith('* ')) {
-        elements.push(
-          <li key={index} className="ml-6 list-disc">
-            {renderInlineFormatting(line.slice(2))}
-          </li>
-        );
-      }
-      // Ordered list
-      else if (/^\d+\.\s/.test(line)) {
-        const content = line.replace(/^\d+\.\s/, '');
-        elements.push(
-          <li key={index} className="ml-6 list-decimal">
-            {renderInlineFormatting(content)}
-          </li>
-        );
-      }
-      // Horizontal rule
-      else if (line === '---' || line === '***') {
-        elements.push(<hr key={index} className="my-8 border-border" />);
-      }
-      // Empty line
-      else if (line.trim() === '') {
-        elements.push(<div key={index} className="h-4" />);
-      }
-      // Regular paragraph
-      else {
-        elements.push(
-          <p key={index} className="text-foreground leading-relaxed mb-4">
-            {renderInlineFormatting(line)}
-          </p>
-        );
-      }
-    });
-
-    return elements;
-  };
-
-  const renderInlineFormatting = (text: string) => {
-    // Bold
-    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    // Italic
-    text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
-    // Inline code
-    text = text.replace(/`(.+?)`/g, '<code class="bg-muted px-1.5 py-0.5 rounded text-sm">$1</code>');
-    // Links
-    text = text.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline" target="_blank" rel="noopener noreferrer">$1</a>');
-    
-    return <span dangerouslySetInnerHTML={{ __html: text }} />;
+    return (
+      <div 
+        className="prose prose-lg max-w-none
+          prose-headings:font-heading prose-headings:text-foreground
+          prose-h1:text-3xl prose-h1:font-bold prose-h1:mt-10 prose-h1:mb-6
+          prose-h2:text-2xl prose-h2:font-bold prose-h2:mt-10 prose-h2:mb-4
+          prose-h3:text-xl prose-h3:font-semibold prose-h3:mt-8 prose-h3:mb-4
+          prose-p:text-foreground prose-p:leading-relaxed prose-p:mb-4
+          prose-strong:text-foreground prose-strong:font-semibold
+          prose-em:italic
+          prose-a:text-primary prose-a:underline hover:prose-a:no-underline
+          prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-muted-foreground
+          prose-ul:list-disc prose-ul:ml-6
+          prose-ol:list-decimal prose-ol:ml-6
+          prose-li:text-foreground
+          prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
+          prose-pre:bg-muted prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto
+          prose-hr:my-8 prose-hr:border-border
+          prose-img:rounded-lg prose-img:max-w-full"
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+    );
   };
 
   if (isLoading) {
