@@ -10,7 +10,7 @@ interface Article {
   title: string;
   content: string;
   excerpt: string;
-  category: string;
+  category: string[];
   tags: string[] | null;
   featured_image_url: string | null;
   read_time: string;
@@ -157,10 +157,14 @@ export default function ArticleView() {
           {/* Article header */}
           <header className="mb-10">
             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-4">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary">
-                <Tag className="w-3.5 h-3.5" />
-                {article.category}
-              </span>
+              <div className="flex flex-wrap gap-2">
+                {article.category.map((cat) => (
+                  <span key={cat} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary">
+                    <Tag className="w-3.5 h-3.5" />
+                    {cat}
+                  </span>
+                ))}
+              </div>
               <span className="inline-flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
                 {formatDate(article.published_at || article.created_at)}

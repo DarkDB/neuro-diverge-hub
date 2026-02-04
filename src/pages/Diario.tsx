@@ -15,11 +15,11 @@ interface Article {
   excerpt: string;
   published_at: string | null;
   created_at: string;
-  category: string;
+  category: string[];
   read_time: string;
 }
 
-const categories = ['Todos', 'TDAH', 'Autismo', 'Sensorialidad', 'General', 'Altas Capacidades', 'Dislexia'];
+const categories = ['Todos', 'TDAH', 'Autismo', 'Sensorialidad', 'General', 'Altas Capacidades', 'Dislexia', 'Doble Excepcionalidad', 'Masking'];
 
 export default function Diario() {
   const { isAdmin } = useAdmin();
@@ -59,7 +59,7 @@ export default function Diario() {
 
   const filteredArticles = selectedCategory === 'Todos'
     ? articles
-    : articles.filter(article => article.category === selectedCategory);
+    : articles.filter(article => article.category.includes(selectedCategory));
 
   return (
     <Layout>
@@ -120,9 +120,9 @@ export default function Diario() {
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
-                      <span className="inline-flex items-center gap-1">
+                      <span className="inline-flex items-center gap-1 flex-wrap">
                         <Tag className="w-3 h-3" />
-                        {article.category}
+                        {article.category.join(', ')}
                       </span>
                       <span>·</span>
                       <span className="inline-flex items-center gap-1">

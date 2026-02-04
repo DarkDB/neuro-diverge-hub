@@ -13,20 +13,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
-const CATEGORIES = ['TDAH', 'Autismo', 'Sensorialidad', 'General', 'Altas Capacidades', 'Dislexia'];
+const CATEGORIES = ['TDAH', 'Autismo', 'Sensorialidad', 'General', 'Altas Capacidades', 'Dislexia', 'Doble Excepcionalidad', 'Masking'];
 
 interface ArticleForm {
   title: string;
   slug: string;
   excerpt: string;
   content: string;
-  category: string;
+  categories: string[];
   tags: string;
   featured_image_url: string;
   read_time: string;
@@ -39,7 +40,7 @@ const initialForm: ArticleForm = {
   slug: '',
   excerpt: '',
   content: '',
-  category: 'General',
+  categories: ['General'],
   tags: '',
   featured_image_url: '',
   read_time: '5 min',
@@ -90,7 +91,7 @@ export default function ArticleEditor() {
         slug: data.slug,
         excerpt: data.excerpt,
         content: data.content,
-        category: data.category,
+        categories: data.category || ['General'],
         tags: (data.tags || []).join(', '),
         featured_image_url: data.featured_image_url || '',
         read_time: data.read_time,
@@ -128,7 +129,7 @@ export default function ArticleEditor() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     
-    if (!form.title || !form.excerpt || !form.content) {
+    if (!form.title || !form.excerpt || !form.content || form.categories.length === 0) {
       toast.error('Por favor completa todos los campos requeridos');
       return;
     }
@@ -145,7 +146,7 @@ export default function ArticleEditor() {
         slug: form.slug || generateSlug(form.title),
         excerpt: form.excerpt,
         content: form.content,
-        category: form.category,
+        category: form.categories,
         tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
         featured_image_url: form.featured_image_url || null,
         read_time: form.read_time,
@@ -262,24 +263,44 @@ export default function ArticleEditor() {
             />
           </div>
 
-          {/* Category, Read Time, Tags */}
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="category">Categoría</Label>
-              <Select
-                value={form.category}
-                onValueChange={(value) => setForm(prev => ({ ...prev, category: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {/* Categories */}
+          <div className="space-y-3">
+            <Label>Categorías *</Label>
+            <div className="flex flex-wrap gap-3">
+              {CATEGORIES.map((cat) => {
+                const isSelected = form.categories.includes(cat);
+                return (
+                  <label
+                    key={cat}
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
+                      isSelected
+                        ? 'bg-primary/10 border-primary text-primary'
+                        : 'bg-card border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={(checked) => {
+                        setForm(prev => ({
+                          ...prev,
+                          categories: checked
+                            ? [...prev.categories, cat]
+                            : prev.categories.filter(c => c !== cat)
+                        }));
+                      }}
+                    />
+                    <span className="text-sm font-medium">{cat}</span>
+                  </label>
+                );
+              })}
             </div>
+            {form.categories.length === 0 && (
+              <p className="text-sm text-destructive">Selecciona al menos una categoría</p>
+            )}
+          </div>
+
+          {/* Read Time, Tags */}
+          <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="read_time">Tiempo de lectura</Label>
               <Input
