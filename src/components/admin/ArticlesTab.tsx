@@ -39,7 +39,7 @@ interface Article {
   id: string;
   title: string;
   slug: string;
-  category: string;
+  category: string[];
   status: string;
   published_at: string | null;
   scheduled_at: string | null;
@@ -114,7 +114,7 @@ export function ArticlesTab() {
 
   const filteredArticles = articles.filter(article =>
     article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    article.category.toLowerCase().includes(searchQuery.toLowerCase())
+    article.category.some(cat => cat.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -181,7 +181,7 @@ export function ArticlesTab() {
                   <TableCell className="font-medium max-w-[300px] truncate">
                     {article.title}
                   </TableCell>
-                  <TableCell>{article.category}</TableCell>
+                  <TableCell>{article.category.join(', ')}</TableCell>
                   <TableCell>{getStatusBadge(article.status)}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
