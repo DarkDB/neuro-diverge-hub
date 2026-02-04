@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Save, Eye, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Calendar, Clock, Upload, X, ImageIcon } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,6 +56,7 @@ export default function ArticleEditor() {
   const [form, setForm] = useState<ArticleForm>(initialForm);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const isEditing = !!id;
 
   useEffect(() => {
@@ -321,16 +322,83 @@ export default function ArticleEditor() {
             </div>
           </div>
 
-          {/* Featured Image */}
-          <div className="space-y-2">
-            <Label htmlFor="featured_image_url">URL de imagen destacada</Label>
-            <Input
-              id="featured_image_url"
-              type="url"
-              value={form.featured_image_url}
-              onChange={(e) => setForm(prev => ({ ...prev, featured_image_url: e.target.value }))}
-              placeholder="https://ejemplo.com/imagen.jpg"
-            />
+          {/* Featured Image Upload */}
+          <div className="space-y-3">
+            <Label>Imagen destacada</Label>
+            
+            {form.featured_image_url ? (
+              <div className="relative rounded-lg overflow-hidden border border-border">
+                <img 
+                  src={form.featured_image_url} 
+                  alt="Imagen destacada" 
+                  className="w-full h-48 object-cover"
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2"
+                  onClick={() => setForm(prev => ({ ...prev, featured_image_url: '' }))}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div className="flex flex-col items-center justify-center py-6">
+                  {isUploadingImage ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  ) : (
+                    <>
+                      <ImageIcon className="w-10 h-10 text-muted-foreground mb-3" />
+                      <p className="text-sm text-muted-foreground mb-1">
+                        <span className="font-semibold text-primary">Haz clic para subir</span> o arrastra una imagen
+                      </p>
+                      <p className="text-xs text-muted-foreground">PNG, JPG o WebP (máx. 5MB)</p>
+                    </>
+                  )}
+                </div>
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    
+                    if (file.size > 5 * 1024 * 1024) {
+                      toast.error('La imagen no puede superar los 5MB');
+                      return;
+                    }
+                    
+                    setIsUploadingImage(true);
+                    try {
+                      const fileExt = file.name.split('.').pop();
+                      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                      
+                      const { error: uploadError } = await supabase.storage
+                        .from('article-images')
+                        .upload(fileName, file);
+                      
+                      if (uploadError) throw uploadError;
+                      
+                      const { data: { publicUrl } } = supabase.storage
+                        .from('article-images')
+                        .getPublicUrl(fileName);
+                      
+                      setForm(prev => ({ ...prev, featured_image_url: publicUrl }));
+                      toast.success('Imagen subida correctamente');
+                    } catch (error) {
+                      console.error('Error uploading image:', error);
+                      toast.error('Error al subir la imagen');
+                    } finally {
+                      setIsUploadingImage(false);
+                    }
+                  }}
+                  disabled={isUploadingImage}
+                />
+              </label>
+            )}
           </div>
 
           {/* Status & Scheduling */}
