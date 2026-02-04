@@ -179,9 +179,6 @@ export default function ArticleView() {
               {article.title}
             </h1>
 
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              {article.excerpt}
-            </p>
           </header>
 
           {/* Article content */}
