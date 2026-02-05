@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, Tag, User } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar, Clock, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,12 +19,19 @@ interface Article {
   author_id: string;
 }
 
+interface ArticleNavigation {
+  slug: string;
+  title: string;
+}
+
 export default function ArticleView() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [article, setArticle] = useState<Article | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [prevArticle, setPrevArticle] = useState<ArticleNavigation | null>(null);
+  const [nextArticle, setNextArticle] = useState<ArticleNavigation | null>(null);
 
   useEffect(() => {
     if (slug) {
@@ -34,6 +41,7 @@ export default function ArticleView() {
 
   async function fetchArticle() {
     try {
+      // Fetch the current article
       const { data, error } = await supabase
         .from('articles')
         .select('*')
@@ -51,6 +59,30 @@ export default function ArticleView() {
       }
 
       setArticle(data);
+
+      // Fetch previous article (older, created before this one)
+      const { data: prevData } = await supabase
+        .from('articles')
+        .select('slug, title')
+        .eq('status', 'published')
+        .lt('created_at', data.created_at)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      setPrevArticle(prevData || null);
+
+      // Fetch next article (newer, created after this one)
+      const { data: nextData } = await supabase
+        .from('articles')
+        .select('slug, title')
+        .eq('status', 'published')
+        .gt('created_at', data.created_at)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .single();
+
+      setNextArticle(nextData || null);
     } catch (err) {
       console.error('Error fetching article:', err);
       setError('Error al cargar el artículo');
@@ -203,14 +235,54 @@ export default function ArticleView() {
             </footer>
           )}
 
-          {/* Back to blog */}
-          <div className="mt-12 text-center">
-            <Button asChild variant="outline">
-              <Link to="/diario">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Ver más artículos
-              </Link>
-            </Button>
+          {/* Article navigation */}
+          <div className="mt-12 pt-8 border-t border-border">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+              {/* Previous article */}
+              {prevArticle ? (
+                <Button
+                  asChild
+                  variant="outline"
+                  className="flex-1 h-auto py-3 justify-start text-left"
+                >
+                  <Link to={`/diario/${prevArticle.slug}`}>
+                    <ChevronLeft className="w-4 h-4 mr-2 shrink-0" />
+                    <div className="min-w-0">
+                      <span className="text-xs text-muted-foreground block">Artículo anterior</span>
+                      <span className="font-medium truncate block">{prevArticle.title}</span>
+                    </div>
+                  </Link>
+                </Button>
+              ) : (
+                <div className="flex-1" />
+              )}
+
+              {/* Back to diary */}
+              <Button asChild variant="ghost" size="sm" className="shrink-0">
+                <Link to="/diario">
+                  Ver todos
+                </Link>
+              </Button>
+
+              {/* Next article */}
+              {nextArticle ? (
+                <Button
+                  asChild
+                  variant="outline"
+                  className="flex-1 h-auto py-3 justify-end text-right"
+                >
+                  <Link to={`/diario/${nextArticle.slug}`}>
+                    <div className="min-w-0">
+                      <span className="text-xs text-muted-foreground block">Artículo siguiente</span>
+                      <span className="font-medium truncate block">{nextArticle.title}</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 ml-2 shrink-0" />
+                  </Link>
+                </Button>
+              ) : (
+                <div className="flex-1" />
+              )}
+            </div>
           </div>
         </div>
       </article>
