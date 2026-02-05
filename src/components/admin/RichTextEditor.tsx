@@ -3,6 +3,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
+import TextAlign from '@tiptap/extension-text-align';
 import { 
   Bold, 
   Italic, 
@@ -17,11 +18,16 @@ import {
   Undo,
   Redo,
   Code,
-  Minus
+  Minus,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  Pilcrow
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 
 interface RichTextEditorProps {
   content: string;
@@ -35,6 +41,11 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3],
+        },
+        paragraph: {
+          HTMLAttributes: {
+            class: '',
+          },
         },
       }),
       Link.configure({
@@ -50,6 +61,9 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
       }),
       Placeholder.configure({
         placeholder: placeholder || 'Escribe el contenido del artículo...',
+      }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
       }),
     ],
     content,
@@ -69,23 +83,25 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
     }
   }, [content, editor]);
 
-  if (!editor) {
-    return null;
-  }
-
-  const addLink = () => {
+  const addLink = useCallback(() => {
+    if (!editor) return;
     const url = window.prompt('URL del enlace:');
     if (url) {
       editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
     }
-  };
+  }, [editor]);
 
-  const addImage = () => {
+  const addImage = useCallback(() => {
+    if (!editor) return;
     const url = window.prompt('URL de la imagen:');
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
     }
-  };
+  }, [editor]);
+
+  if (!editor) {
+    return null;
+  }
 
   const ToolbarButton = ({ 
     onClick, 
@@ -138,6 +154,13 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
         <div className="w-px h-6 bg-border mx-1" />
 
         <ToolbarButton
+          onClick={() => editor.chain().focus().setParagraph().run()}
+          isActive={editor.isActive('paragraph')}
+          title="Párrafo"
+        >
+          <Pilcrow className="w-4 h-4" />
+        </ToolbarButton>
+        <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
           isActive={editor.isActive('heading', { level: 1 })}
           title="Título 1"
@@ -181,6 +204,37 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           title="Código"
         >
           <Code className="w-4 h-4" />
+        </ToolbarButton>
+
+        <div className="w-px h-6 bg-border mx-1" />
+
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          isActive={editor.isActive({ textAlign: 'left' })}
+          title="Alinear izquierda"
+        >
+          <AlignLeft className="w-4 h-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          isActive={editor.isActive({ textAlign: 'center' })}
+          title="Centrar"
+        >
+          <AlignCenter className="w-4 h-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          isActive={editor.isActive({ textAlign: 'right' })}
+          title="Alinear derecha"
+        >
+          <AlignRight className="w-4 h-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+          isActive={editor.isActive({ textAlign: 'justify' })}
+          title="Justificar"
+        >
+          <AlignJustify className="w-4 h-4" />
         </ToolbarButton>
 
         <div className="w-px h-6 bg-border mx-1" />
@@ -231,7 +285,21 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
       </div>
 
       {/* Editor */}
-      <EditorContent editor={editor} />
+      <EditorContent 
+        editor={editor} 
+        className="[&_.ProseMirror]:min-h-[300px] [&_.ProseMirror]:p-4 [&_.ProseMirror]:focus:outline-none
+          [&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h1]:mt-6 [&_.ProseMirror_h1]:mb-4
+          [&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h2]:font-bold [&_.ProseMirror_h2]:mt-5 [&_.ProseMirror_h2]:mb-3
+          [&_.ProseMirror_h3]:text-xl [&_.ProseMirror_h3]:font-semibold [&_.ProseMirror_h3]:mt-4 [&_.ProseMirror_h3]:mb-2
+          [&_.ProseMirror_p]:mb-3 [&_.ProseMirror_p]:leading-relaxed
+          [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:ml-6 [&_.ProseMirror_ul]:mb-3
+          [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:ml-6 [&_.ProseMirror_ol]:mb-3
+          [&_.ProseMirror_li]:mb-1
+          [&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:border-primary [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:italic [&_.ProseMirror_blockquote]:text-muted-foreground [&_.ProseMirror_blockquote]:my-4
+          [&_.ProseMirror_hr]:my-6 [&_.ProseMirror_hr]:border-border
+          [&_.ProseMirror_code]:bg-muted [&_.ProseMirror_code]:px-1.5 [&_.ProseMirror_code]:py-0.5 [&_.ProseMirror_code]:rounded [&_.ProseMirror_code]:text-sm
+          [&_.ProseMirror_img]:rounded-lg [&_.ProseMirror_img]:max-w-full"
+      />
     </div>
   );
 }
