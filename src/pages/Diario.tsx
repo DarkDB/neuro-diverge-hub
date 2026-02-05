@@ -37,7 +37,7 @@ export default function Diario() {
         .from('articles')
         .select('id, slug, title, excerpt, published_at, created_at, category, read_time')
         .eq('status', 'published')
-        .order('published_at', { ascending: false });
+       .order('created_at', { ascending: false });
 
       if (error) throw error;
       setArticles(data || []);
