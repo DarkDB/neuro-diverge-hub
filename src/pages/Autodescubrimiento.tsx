@@ -450,7 +450,7 @@ export default function Autodescubrimiento() {
 
       toast({
         title: '¡Informe completado!',
-        description: 'Tu informe de cribado ha sido generado.',
+        description: 'Tu informe ha sido generado correctamente.',
       });
     } catch (error) {
       console.error('Error:', error);
@@ -491,7 +491,7 @@ export default function Autodescubrimiento() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = data.filename || 'informe-cribado.pdf';
+      link.download = data.filename || 'informe-exploracion.pdf';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -539,12 +539,12 @@ export default function Autodescubrimiento() {
           <div className="max-w-3xl mx-auto text-center animate-slide-up">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
               <Compass className="w-4 h-4" />
-              <span>Cribado Estructurado con IA</span>
+              <span>Exploración Personalizada</span>
             </div>
             <SectionTitle
               as="h1"
               align="center"
-              subtitle="Proceso de cribado en 3 fases para identificar fortalezas y posibles neurodivergencias."
+              subtitle="Un proceso en 3 fases para explorar tus fortalezas y comprender mejor tu perfil neurocognitivo."
             >
               Mi Viaje de Autodescubrimiento
             </SectionTitle>
@@ -592,7 +592,7 @@ export default function Autodescubrimiento() {
             <div className="space-y-8 animate-fade-in">
               <ContentBlock>
                 <h2 className="font-heading font-semibold text-xl mb-4">
-                  ¿Cómo funciona el cribado?
+                  ¿Cómo funciona?
                 </h2>
                 <div className="space-y-4">
                   <div className="flex gap-4">
@@ -600,9 +600,9 @@ export default function Autodescubrimiento() {
                       1
                     </div>
                     <div>
-                      <h3 className="font-medium">Fase 1: Cribado Inicial (Gratuito)</h3>
+                      <h3 className="font-medium">Fase 1: Exploración Inicial (Gratuita)</h3>
                       <p className="text-sm text-muted-foreground">
-                        Indícanos la edad y género del evaluado. La IA generará 6-8 preguntas personalizadas para explorar fortalezas y posibles desafíos.
+                        Indícanos la edad y género del evaluado. Generaremos 6-8 preguntas personalizadas para explorar fortalezas y posibles desafíos.
                       </p>
                     </div>
                   </div>
@@ -637,7 +637,7 @@ export default function Autodescubrimiento() {
                   <div>
                     <h3 className="font-medium mb-1">Aviso importante</h3>
                     <p className="text-sm text-muted-foreground">
-                      Este cribado tiene fines orientativos y NO constituye un diagnóstico clínico. 
+                      Esta exploración tiene fines orientativos y NO constituye un diagnóstico clínico. 
                       Siempre recomendamos buscar una evaluación profesional completa.
                     </p>
                   </div>
@@ -646,7 +646,7 @@ export default function Autodescubrimiento() {
 
               <div className="text-center">
                 <Button size="lg" onClick={handleStartProfile} className="gap-2">
-                  Comenzar Cribado
+                  Comenzar Exploración
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
@@ -755,7 +755,7 @@ export default function Autodescubrimiento() {
             <div className="space-y-6 animate-fade-in">
               <ContentBlock variant="highlight">
                 <h2 className="font-heading font-semibold text-xl mb-2">
-                  Fase 1: Cribado Inicial
+                  Fase 1: Exploración Inicial
                 </h2>
                 {phase1Intro && (
                   <p className="text-muted-foreground">{phase1Intro}</p>
@@ -1005,7 +1005,7 @@ export default function Autodescubrimiento() {
                   <h2 className="font-heading font-semibold text-xl">Fase 1 Completada</h2>
                 </div>
                 <p className="text-muted-foreground">
-                  Has respondido todas las preguntas del cribado inicial. 
+                  Has respondido todas las preguntas de la exploración inicial. 
                   Para continuar con el análisis completo, realiza el pago seguro con Stripe.
                 </p>
               </ContentBlock>
@@ -1351,7 +1351,7 @@ export default function Autodescubrimiento() {
                     )}
                   </Button>
                   <Button variant="outline" onClick={resetProcessHandler}>
-                    Realizar nuevo cribado
+                    Realizar nueva exploración
                   </Button>
                 </div>
               </div>
