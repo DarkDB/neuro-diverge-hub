@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { PenLine, Calendar, ArrowRight, Tag, Settings } from 'lucide-react';
+import { PenLine, Calendar, ArrowRight, Tag, Settings, ArrowUpDown } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ export default function Diario() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
 
   useEffect(() => {
     fetchArticles();
@@ -57,9 +58,14 @@ export default function Diario() {
     });
   };
 
-  const filteredArticles = selectedCategory === 'Todos'
+  const filteredArticles = (selectedCategory === 'Todos'
     ? articles
-    : articles.filter(article => article.category.includes(selectedCategory));
+    : articles.filter(article => article.category.includes(selectedCategory))
+  ).sort((a, b) => {
+    const dateA = new Date(a.created_at).getTime();
+    const dateB = new Date(b.created_at).getTime();
+    return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+  });
 
   return (
     <Layout>
@@ -162,6 +168,35 @@ export default function Diario() {
           {/* Sidebar */}
           <aside className="lg:w-72 shrink-0">
             <div className="sticky top-24 space-y-6">
+              {/* Sort Order */}
+              <div className="p-6 rounded-xl bg-card border border-border">
+                <h3 className="font-heading font-semibold mb-4">Ordenar por fecha</h3>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => setSortOrder('desc')}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors focus-ring ${
+                      sortOrder === 'desc'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-accent text-accent-foreground hover:bg-primary hover:text-primary-foreground'
+                    }`}
+                  >
+                    <ArrowUpDown className="w-3.5 h-3.5" />
+                    Más recientes primero
+                  </button>
+                  <button
+                    onClick={() => setSortOrder('asc')}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors focus-ring ${
+                      sortOrder === 'asc'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-accent text-accent-foreground hover:bg-primary hover:text-primary-foreground'
+                    }`}
+                  >
+                    <ArrowUpDown className="w-3.5 h-3.5" />
+                    Más antiguos primero
+                  </button>
+                </div>
+              </div>
+
               {/* Categories */}
               <div className="p-6 rounded-xl bg-card border border-border">
                 <h3 className="font-heading font-semibold mb-4">Categorías</h3>
