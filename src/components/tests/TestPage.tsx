@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, Loader2, Lock, FileText, Download } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, Loader2, Lock, FileText, Download, Mail } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { ContentBlock } from '@/components/ui/ContentBlock';
@@ -8,6 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -54,6 +62,8 @@ export function TestPage({ config }: TestPageProps) {
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [premiumPdfUrl, setPremiumPdfUrl] = useState<string | null>(null);
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [emailInput, setEmailInput] = useState('');
 
   // Check for payment success on mount
   useEffect(() => {
@@ -115,6 +125,30 @@ export function TestPage({ config }: TestPageProps) {
 
   const progress = ((currentQuestion + 1) / config.questions.length) * 100;
   const currentAnswer = answers[config.questions[currentQuestion]?.id];
+
+  const handleRequestAnalysis = () => {
+    setShowEmailDialog(true);
+  };
+
+  const handleEmailSubmitAndAnalyze = async () => {
+    if (!emailInput.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.trim())) {
+      toast.error('Por favor, introduce un email válido');
+      return;
+    }
+
+    // Save email to newsletter_subscribers (ignore if already exists)
+    try {
+      await supabase.from('newsletter_subscribers').upsert(
+        { email: emailInput.trim(), source: 'test_analysis' },
+        { onConflict: 'email' }
+      );
+    } catch (e) {
+      // Non-blocking, continue with analysis
+    }
+
+    setShowEmailDialog(false);
+    await handleGetAnalysis();
+  };
 
   const handleGetAnalysis = async () => {
     if (!result) return;
@@ -388,7 +422,7 @@ export function TestPage({ config }: TestPageProps) {
                       Obtén un análisis breve de tus resultados generado por IA.
                     </p>
                     <Button
-                      onClick={handleGetAnalysis}
+                      onClick={handleRequestAnalysis}
                       disabled={loadingAnalysis}
                       variant="outline"
                       className="gap-2"
@@ -535,6 +569,37 @@ export function TestPage({ config }: TestPageProps) {
           )}
         </div>
       </div>
+
+      {/* Email Dialog */}
+      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5 text-primary" />
+              Introduce tu email
+            </DialogTitle>
+            <DialogDescription>
+              Déjanos tu email para recibir tu análisis gratuito y poder enviarte contenido relevante sobre neurodivergencia.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <Input
+              type="email"
+              placeholder="tu@email.com"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmitAndAnalyze()}
+            />
+            <Button onClick={handleEmailSubmitAndAnalyze} className="w-full gap-2">
+              <Mail className="w-4 h-4" />
+              Obtener mi análisis
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              No compartiremos tu email con terceros. Puedes darte de baja en cualquier momento.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
