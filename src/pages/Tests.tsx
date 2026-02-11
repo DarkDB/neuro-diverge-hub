@@ -55,6 +55,14 @@ const tests = [
     time: '7-10 min',
     href: '/tests/dispraxia',
   },
+  {
+    id: 'altas-capacidades',
+    name: 'Screening de Altas Capacidades',
+    description: 'Evaluación orientativa de rasgos de AACC. Incluye versión para adultos y para padres/madres.',
+    questions: 20,
+    time: '8-12 min',
+    href: '/tests/altas-capacidades',
+  },
 ];
 
 export default function Tests() {
