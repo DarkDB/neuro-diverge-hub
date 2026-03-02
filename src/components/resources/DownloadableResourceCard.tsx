@@ -1,14 +1,20 @@
-import { useState } from 'react';
-import { Download, FileText, Image, Music, Video, File, Play, Pause, Volume2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Download, FileText, Image, Music, Video, File, Play, Pause, Volume2, ShoppingCart, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface DownloadableResourceCardProps {
+  id: string;
   title: string;
   description?: string;
   fileType: string;
   fileUrl: string;
   downloadCount?: number;
   category: string;
+  isPaid?: boolean;
+  priceCents?: number;
+  purchasedSessionId?: string | null;
 }
 
 const isImageType = (fileType: string) => {
@@ -53,37 +59,93 @@ const formatFileType = (fileType: string) => {
 };
 
 export function DownloadableResourceCard({
+  id,
   title,
   description,
   fileType,
   fileUrl,
   downloadCount,
   category,
+  isPaid = false,
+  priceCents,
+  purchasedSessionId,
 }: DownloadableResourceCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
   const [imageError, setImageError] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isPurchased, setIsPurchased] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 
-  const handleDownload = async () => {
+  // If a purchasedSessionId is provided, verify and unlock the download
+  useEffect(() => {
+    if (purchasedSessionId && isPaid) {
+      verifyPurchase(purchasedSessionId);
+    }
+  }, [purchasedSessionId, isPaid]);
+
+  const verifyPurchase = async (sessionId: string) => {
+    setIsProcessing(true);
     try {
-      const response = await fetch(fileUrl);
+      const { data, error } = await supabase.functions.invoke('verify-resource-purchase', {
+        body: { session_id: sessionId, resource_id: id },
+      });
+
+      if (error) throw error;
+      if (data?.verified) {
+        setIsPurchased(true);
+        setDownloadUrl(data.file_url);
+        toast.success('¡Compra verificada! Ya puedes descargar tu recurso.');
+      }
+    } catch (error) {
+      console.error('Error verifying purchase:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDownload = async (url?: string) => {
+    const downloadFrom = url || fileUrl;
+    try {
+      const response = await fetch(downloadFrom);
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
-      // Extract filename from URL or use title
-      const urlParts = fileUrl.split('/');
+      link.href = blobUrl;
+      const urlParts = downloadFrom.split('/');
       const originalFilename = urlParts[urlParts.length - 1];
       const extension = originalFilename.split('.').pop() || '';
       link.download = `${title}.${extension}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error('Error downloading file:', error);
-      // Fallback to opening in new tab
-      window.open(fileUrl, '_blank');
+      window.open(downloadFrom, '_blank');
+    }
+  };
+
+  const handlePurchase = async () => {
+    setIsProcessing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-resource-payment', {
+        body: {
+          resource_id: id,
+          resource_title: title,
+          price_cents: priceCents,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Error creating payment:', error);
+      toast.error('Error al procesar el pago. Inténtalo de nuevo.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -104,11 +166,27 @@ export function DownloadableResourceCard({
 
   const showImagePreview = isImageType(fileType) && !imageError;
   const showAudioPlayer = isAudioType(fileType);
+  const priceFormatted = priceCents ? (priceCents / 100).toFixed(2) : '0.00';
 
   return (
     <div className="group p-5 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all">
+      {/* Price Badge for paid resources */}
+      {isPaid && (
+        <div className="flex items-center justify-between mb-3">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-sm font-semibold">
+            {priceFormatted}€
+          </span>
+          {isPurchased && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-medium">
+              <Check className="w-3 h-3" />
+              Comprado
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Image Preview */}
-      {showImagePreview && (
+      {showImagePreview && !isPaid && (
         <div className="mb-4 rounded-lg overflow-hidden bg-muted aspect-video relative">
           <img
             src={fileUrl}
@@ -137,12 +215,12 @@ export function DownloadableResourceCard({
             <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{description}</p>
           )}
 
-          {/* Audio Player */}
-          {showAudioPlayer && (
+          {/* Audio Player (only for free or purchased) */}
+          {showAudioPlayer && (!isPaid || isPurchased) && (
             <div className="mt-3 flex items-center gap-3 p-3 rounded-lg bg-muted/50">
               <audio
                 ref={setAudioRef}
-                src={fileUrl}
+                src={isPurchased ? downloadUrl || fileUrl : fileUrl}
                 onEnded={handleAudioEnded}
                 preload="metadata"
               />
@@ -174,15 +252,39 @@ export function DownloadableResourceCard({
             </p>
           )}
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleDownload}
-          className="shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
-          aria-label={`Descargar ${title}`}
-        >
-          <Download className="w-5 h-5" />
-        </Button>
+
+        {/* Action button */}
+        {isPaid && !isPurchased ? (
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handlePurchase}
+            disabled={isProcessing}
+            className="shrink-0 gap-1.5"
+          >
+            {isProcessing ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <ShoppingCart className="w-4 h-4" />
+            )}
+            {isProcessing ? 'Procesando...' : `${priceFormatted}€`}
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleDownload(isPurchased && downloadUrl ? downloadUrl : undefined)}
+            disabled={isProcessing}
+            className="shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
+            aria-label={`Descargar ${title}`}
+          >
+            {isProcessing ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Download className="w-5 h-5" />
+            )}
+          </Button>
+        )}
       </div>
     </div>
   );
