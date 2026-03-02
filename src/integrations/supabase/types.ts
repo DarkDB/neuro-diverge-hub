@@ -79,7 +79,10 @@ export type Database = {
           file_url: string
           id: string
           is_active: boolean | null
+          is_paid: boolean
           neurodivergence_type: string | null
+          price_cents: number | null
+          stripe_price_id: string | null
           title: string
           updated_at: string
         }
@@ -93,7 +96,10 @@ export type Database = {
           file_url: string
           id?: string
           is_active?: boolean | null
+          is_paid?: boolean
           neurodivergence_type?: string | null
+          price_cents?: number | null
+          stripe_price_id?: string | null
           title: string
           updated_at?: string
         }
@@ -107,7 +113,10 @@ export type Database = {
           file_url?: string
           id?: string
           is_active?: boolean | null
+          is_paid?: boolean
           neurodivergence_type?: string | null
+          price_cents?: number | null
+          stripe_price_id?: string | null
           title?: string
           updated_at?: string
         }
@@ -163,6 +172,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      resource_purchases: {
+        Row: {
+          email: string
+          id: string
+          purchased_at: string
+          resource_id: string
+          stripe_checkout_session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          email: string
+          id?: string
+          purchased_at?: string
+          resource_id: string
+          stripe_checkout_session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          email?: string
+          id?: string
+          purchased_at?: string
+          resource_id?: string
+          stripe_checkout_session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_purchases_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "downloadable_resources"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       screening_sessions: {
         Row: {
