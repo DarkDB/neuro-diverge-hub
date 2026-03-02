@@ -11,7 +11,8 @@ import {
   Music,
   Video,
   File,
-  X
+  X,
+  Euro
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,6 +68,9 @@ interface DownloadableResource {
   download_count: number | null;
   is_active: boolean;
   neurodivergence_type: string | null;
+  is_paid: boolean;
+  price_cents: number | null;
+  stripe_price_id: string | null;
   created_at: string;
 }
 
@@ -126,6 +130,8 @@ export function ResourcesTab() {
     description: '',
     category: 'general',
     neurodivergence_type: 'none',
+    is_paid: false,
+    price_euros: '',
     file: null as File | null,
   });
 
@@ -159,6 +165,11 @@ export function ResourcesTab() {
       return;
     }
 
+    if (form.is_paid && (!form.price_euros || parseFloat(form.price_euros) <= 0)) {
+      toast.error('Por favor indica un precio válido para el recurso de pago');
+      return;
+    }
+
     setIsUploading(true);
     try {
       // Generate unique file name
@@ -178,6 +189,8 @@ export function ResourcesTab() {
         .from('recursos')
         .getPublicUrl(filePath);
 
+      const priceCents = form.is_paid ? Math.round(parseFloat(form.price_euros) * 100) : null;
+
       // Save metadata to database
       const { error: dbError } = await supabase
         .from('downloadable_resources')
@@ -190,6 +203,8 @@ export function ResourcesTab() {
           file_size_bytes: form.file.size,
           neurodivergence_type: form.neurodivergence_type === 'none' ? null : form.neurodivergence_type,
           is_active: true,
+          is_paid: form.is_paid,
+          price_cents: priceCents,
         });
 
       if (dbError) throw dbError;
@@ -201,6 +216,8 @@ export function ResourcesTab() {
         description: '',
         category: 'general',
         neurodivergence_type: 'none',
+        is_paid: false,
+        price_euros: '',
         file: null,
       });
       if (fileInputRef.current) {
@@ -365,6 +382,37 @@ export function ResourcesTab() {
               </div>
 
               <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="is_paid"
+                    checked={form.is_paid}
+                    onChange={(e) => setForm(prev => ({ ...prev, is_paid: e.target.checked, price_euros: e.target.checked ? prev.price_euros : '' }))}
+                    className="rounded border-input"
+                  />
+                  <Label htmlFor="is_paid" className="flex items-center gap-1">
+                    <Euro className="w-4 h-4" />
+                    Recurso de pago
+                  </Label>
+                </div>
+                {form.is_paid && (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0.50"
+                      value={form.price_euros}
+                      onChange={(e) => setForm(prev => ({ ...prev, price_euros: e.target.value }))}
+                      placeholder="Precio en €"
+                      className="w-32"
+                      required={form.is_paid}
+                    />
+                    <span className="text-sm text-muted-foreground">€</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="file">Archivo *</Label>
                 <div className="flex items-center gap-2">
                   <Input
@@ -447,6 +495,7 @@ export function ResourcesTab() {
               <TableRow>
                 <TableHead>Recurso</TableHead>
                 <TableHead>Categoría</TableHead>
+                <TableHead>Precio</TableHead>
                 <TableHead>Tamaño</TableHead>
                 <TableHead>Descargas</TableHead>
                 <TableHead>Estado</TableHead>
@@ -473,6 +522,15 @@ export function ResourcesTab() {
                     <Badge variant="secondary">
                       {CATEGORIES.find(c => c.value === resource.category)?.label || resource.category}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {resource.is_paid ? (
+                      <Badge className="bg-amber-500/20 text-amber-600">
+                        {((resource.price_cents || 0) / 100).toFixed(2)}€
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">Gratis</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {formatFileSize(resource.file_size_bytes)}

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Download, FolderOpen } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { DownloadableResourceCard } from './DownloadableResourceCard';
@@ -14,9 +15,16 @@ interface DownloadableResource {
   file_url: string;
   download_count: number | null;
   neurodivergence_type: string | null;
+  is_paid: boolean;
+  price_cents: number | null;
 }
 
 export function DownloadableResourcesSection() {
+  const [searchParams] = useSearchParams();
+  const purchaseSuccess = searchParams.get('purchase_success') === 'true';
+  const purchasedResourceId = searchParams.get('resource_id');
+  const purchaseSessionId = searchParams.get('session_id');
+
   const { data: resources, isLoading } = useQuery({
     queryKey: ['downloadable-resources'],
     queryFn: async () => {
@@ -105,12 +113,20 @@ export function DownloadableResourcesSection() {
             {categoryResources.map((resource) => (
               <DownloadableResourceCard
                 key={resource.id}
+                id={resource.id}
                 title={resource.title}
                 description={resource.description || undefined}
                 fileType={resource.file_type}
                 fileUrl={resource.file_url}
                 downloadCount={resource.download_count || undefined}
                 category={categoryLabels[resource.category] || resource.category}
+                isPaid={resource.is_paid}
+                priceCents={resource.price_cents || undefined}
+                purchasedSessionId={
+                  purchaseSuccess && purchasedResourceId === resource.id
+                    ? purchaseSessionId
+                    : null
+                }
               />
             ))}
           </div>
