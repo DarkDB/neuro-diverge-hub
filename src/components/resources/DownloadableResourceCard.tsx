@@ -107,6 +107,9 @@ export function DownloadableResourceCard({
   const handleDownload = async (url?: string) => {
     const downloadFrom = url || fileUrl;
     try {
+      // Increment download counter
+      supabase.rpc('increment_download_count', { resource_id: id }).then(() => {});
+
       const response = await fetch(downloadFrom);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
