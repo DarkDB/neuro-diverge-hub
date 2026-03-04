@@ -276,6 +276,36 @@ export type Database = {
           },
         ]
       }
+      test_completions: {
+        Row: {
+          banda: string | null
+          completed_at: string
+          id: string
+          max_puntuacion: number | null
+          puntuacion: number | null
+          test_id: string
+          test_name: string
+        }
+        Insert: {
+          banda?: string | null
+          completed_at?: string
+          id?: string
+          max_puntuacion?: number | null
+          puntuacion?: number | null
+          test_id: string
+          test_name: string
+        }
+        Update: {
+          banda?: string | null
+          completed_at?: string
+          id?: string
+          max_puntuacion?: number | null
+          puntuacion?: number | null
+          test_id?: string
+          test_name?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -308,6 +338,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_download_count: {
+        Args: { resource_id: string }
+        Returns: undefined
       }
     }
     Enums: {

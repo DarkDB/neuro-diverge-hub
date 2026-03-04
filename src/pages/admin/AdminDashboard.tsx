@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, FileText, Download } from 'lucide-react';
+import { ArrowLeft, FileText, Download, BarChart3 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { ArticlesTab } from '@/components/admin/ArticlesTab';
 import { ResourcesTab } from '@/components/admin/ResourcesTab';
+import { StatsTab } from '@/components/admin/StatsTab';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -67,7 +68,7 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-lg grid-cols-3">
             <TabsTrigger value="articles" className="gap-2">
               <FileText className="w-4 h-4" />
               Artículos
@@ -75,6 +76,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="resources" className="gap-2">
               <Download className="w-4 h-4" />
               Recursos
+            </TabsTrigger>
+            <TabsTrigger value="stats" className="gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Estadísticas
             </TabsTrigger>
           </TabsList>
 
@@ -84,6 +89,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="resources">
             <ResourcesTab />
+          </TabsContent>
+
+          <TabsContent value="stats">
+            <StatsTab />
           </TabsContent>
         </Tabs>
       </div>

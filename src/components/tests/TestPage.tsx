@@ -115,6 +115,15 @@ export function TestPage({ config }: TestPageProps) {
       const testResult = config.calculateResult(answers);
       setResult(testResult);
       setCurrentStep('results');
+
+      // Track test completion (fire and forget)
+      supabase.from('test_completions').insert({
+        test_id: config.id,
+        test_name: config.fullName,
+        puntuacion: testResult.puntuacion,
+        max_puntuacion: testResult.maxPuntuacion,
+        banda: testResult.banda,
+      }).then(() => {});
     }
   };
 
