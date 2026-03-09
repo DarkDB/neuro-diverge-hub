@@ -275,6 +275,55 @@ export function ResourcesTab() {
     }
   }
 
+  function openEditDialog(resource: DownloadableResource) {
+    setEditingResource(resource);
+    setEditForm({
+      title: resource.title,
+      description: resource.description || '',
+      category: resource.category,
+      neurodivergence_type: resource.neurodivergence_type || 'none',
+      is_paid: resource.is_paid,
+      price_euros: resource.price_cents ? (resource.price_cents / 100).toFixed(2) : '',
+    });
+    setIsEditDialogOpen(true);
+  }
+
+  async function handleEditSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingResource) return;
+
+    if (editForm.is_paid && (!editForm.price_euros || parseFloat(editForm.price_euros) <= 0)) {
+      toast.error('Por favor indica un precio válido');
+      return;
+    }
+
+    try {
+      const priceCents = editForm.is_paid ? Math.round(parseFloat(editForm.price_euros) * 100) : null;
+
+      const { error } = await supabase
+        .from('downloadable_resources')
+        .update({
+          title: editForm.title,
+          description: editForm.description || null,
+          category: editForm.category,
+          neurodivergence_type: editForm.neurodivergence_type === 'none' ? null : editForm.neurodivergence_type,
+          is_paid: editForm.is_paid,
+          price_cents: priceCents,
+        })
+        .eq('id', editingResource.id);
+
+      if (error) throw error;
+
+      toast.success('Recurso actualizado correctamente');
+      setIsEditDialogOpen(false);
+      setEditingResource(null);
+      fetchResources();
+    } catch (error) {
+      console.error('Error updating resource:', error);
+      toast.error('Error al actualizar el recurso');
+    }
+  }
+
   async function toggleActive(resource: DownloadableResource) {
     try {
       const { error } = await supabase
