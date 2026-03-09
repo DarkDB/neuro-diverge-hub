@@ -616,6 +616,14 @@ export function ResourcesTab() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => openEditDialog(resource)}
+                        title="Editar"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => window.open(resource.file_url, '_blank')}
                         title="Descargar"
                       >
