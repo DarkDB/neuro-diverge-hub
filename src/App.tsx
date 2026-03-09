@@ -79,6 +79,7 @@ const App = () => (
               <Route path="/admin/articles/:id" element={<ArticleEditor />} />
               <Route path="/pago-exitoso" element={<PaymentSuccess />} />
               <Route path="/pago-cancelado" element={<PaymentCanceled />} />
+              <Route path="/ig" element={<LandingIG />} />
               <Route path="/privacidad" element={<Privacidad />} />
               <Route path="/cookies" element={<Cookies />} />
               <Route path="/aviso-legal" element={<AvisoLegal />} />
