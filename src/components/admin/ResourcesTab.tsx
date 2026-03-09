@@ -126,6 +126,9 @@ export function ResourcesTab() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [editingResource, setEditingResource] = useState<DownloadableResource | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -134,6 +137,15 @@ export function ResourcesTab() {
     is_paid: false,
     price_euros: '',
     file: null as File | null,
+  });
+
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    category: 'general',
+    neurodivergence_type: 'none',
+    is_paid: false,
+    price_euros: '',
   });
 
   useEffect(() => {
