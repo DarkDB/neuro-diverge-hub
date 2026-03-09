@@ -12,6 +12,7 @@ interface DownloadableResourceCardProps {
   fileUrl: string;
   downloadCount?: number;
   category: string;
+  neurodivergenceType?: string | null;
   isPaid?: boolean;
   priceCents?: number;
   purchasedSessionId?: string | null;
@@ -66,6 +67,7 @@ export function DownloadableResourceCard({
   fileUrl,
   downloadCount,
   category,
+  neurodivergenceType,
   isPaid = false,
   priceCents,
   purchasedSessionId,
@@ -207,11 +209,16 @@ export function DownloadableResourceCard({
           {getFileIcon(fileType)}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
               {formatFileType(fileType)}
             </span>
             <span className="text-xs text-muted-foreground">{category}</span>
+            {neurodivergenceType && (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                {neurodivergenceType}
+              </span>
+            )}
           </div>
           <h4 className="font-medium text-foreground truncate">{title}</h4>
           {description && (

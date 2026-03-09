@@ -120,6 +120,7 @@ export function DownloadableResourcesSection() {
                 fileUrl={resource.file_url}
                 downloadCount={resource.download_count || undefined}
                 category={categoryLabels[resource.category] || resource.category}
+                neurodivergenceType={resource.neurodivergence_type}
                 isPaid={resource.is_paid}
                 priceCents={resource.price_cents || undefined}
                 purchasedSessionId={

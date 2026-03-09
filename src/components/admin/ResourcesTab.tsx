@@ -12,7 +12,8 @@ import {
   Video,
   File,
   X,
-  Euro
+  Euro,
+  Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -125,6 +126,9 @@ export function ResourcesTab() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [editingResource, setEditingResource] = useState<DownloadableResource | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -133,6 +137,15 @@ export function ResourcesTab() {
     is_paid: false,
     price_euros: '',
     file: null as File | null,
+  });
+
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    category: 'general',
+    neurodivergence_type: 'none',
+    is_paid: false,
+    price_euros: '',
   });
 
   useEffect(() => {
@@ -259,6 +272,55 @@ export function ResourcesTab() {
     } catch (error) {
       console.error('Error deleting resource:', error);
       toast.error('Error al eliminar el recurso');
+    }
+  }
+
+  function openEditDialog(resource: DownloadableResource) {
+    setEditingResource(resource);
+    setEditForm({
+      title: resource.title,
+      description: resource.description || '',
+      category: resource.category,
+      neurodivergence_type: resource.neurodivergence_type || 'none',
+      is_paid: resource.is_paid,
+      price_euros: resource.price_cents ? (resource.price_cents / 100).toFixed(2) : '',
+    });
+    setIsEditDialogOpen(true);
+  }
+
+  async function handleEditSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingResource) return;
+
+    if (editForm.is_paid && (!editForm.price_euros || parseFloat(editForm.price_euros) <= 0)) {
+      toast.error('Por favor indica un precio válido');
+      return;
+    }
+
+    try {
+      const priceCents = editForm.is_paid ? Math.round(parseFloat(editForm.price_euros) * 100) : null;
+
+      const { error } = await supabase
+        .from('downloadable_resources')
+        .update({
+          title: editForm.title,
+          description: editForm.description || null,
+          category: editForm.category,
+          neurodivergence_type: editForm.neurodivergence_type === 'none' ? null : editForm.neurodivergence_type,
+          is_paid: editForm.is_paid,
+          price_cents: priceCents,
+        })
+        .eq('id', editingResource.id);
+
+      if (error) throw error;
+
+      toast.success('Recurso actualizado correctamente');
+      setIsEditDialogOpen(false);
+      setEditingResource(null);
+      fetchResources();
+    } catch (error) {
+      console.error('Error updating resource:', error);
+      toast.error('Error al actualizar el recurso');
     }
   }
 
@@ -554,6 +616,14 @@ export function ResourcesTab() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => openEditDialog(resource)}
+                        title="Editar"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => window.open(resource.file_url, '_blank')}
                         title="Descargar"
                       >
@@ -596,6 +666,118 @@ export function ResourcesTab() {
           </Table>
         )}
       </div>
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Recurso</DialogTitle>
+            <DialogDescription>
+              Modifica los datos del recurso
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditSave} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Título *</Label>
+              <Input
+                id="edit-title"
+                value={editForm.title}
+                onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Descripción</Label>
+              <Textarea
+                id="edit-description"
+                value={editForm.description}
+                onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                rows={2}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Categoría</Label>
+                <Select
+                  value={editForm.category}
+                  onValueChange={(value) => setEditForm(prev => ({ ...prev, category: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Neurodivergencia</Label>
+                <Select
+                  value={editForm.neurodivergence_type}
+                  onValueChange={(value) => setEditForm(prev => ({ ...prev, neurodivergence_type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NEURODIVERGENCE_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="edit-is_paid"
+                  checked={editForm.is_paid}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, is_paid: e.target.checked, price_euros: e.target.checked ? prev.price_euros : '' }))}
+                  className="rounded border-input"
+                />
+                <Label htmlFor="edit-is_paid" className="flex items-center gap-1">
+                  <Euro className="w-4 h-4" />
+                  Recurso de pago
+                </Label>
+              </div>
+              {editForm.is_paid && (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0.50"
+                    value={editForm.price_euros}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, price_euros: e.target.value }))}
+                    placeholder="Precio en €"
+                    className="w-32"
+                    required={editForm.is_paid}
+                  />
+                  <span className="text-sm text-muted-foreground">€</span>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit">
+                Guardar cambios
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
