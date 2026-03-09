@@ -666,6 +666,118 @@ export function ResourcesTab() {
           </Table>
         )}
       </div>
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Recurso</DialogTitle>
+            <DialogDescription>
+              Modifica los datos del recurso
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditSave} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Título *</Label>
+              <Input
+                id="edit-title"
+                value={editForm.title}
+                onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Descripción</Label>
+              <Textarea
+                id="edit-description"
+                value={editForm.description}
+                onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                rows={2}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Categoría</Label>
+                <Select
+                  value={editForm.category}
+                  onValueChange={(value) => setEditForm(prev => ({ ...prev, category: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Neurodivergencia</Label>
+                <Select
+                  value={editForm.neurodivergence_type}
+                  onValueChange={(value) => setEditForm(prev => ({ ...prev, neurodivergence_type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NEURODIVERGENCE_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="edit-is_paid"
+                  checked={editForm.is_paid}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, is_paid: e.target.checked, price_euros: e.target.checked ? prev.price_euros : '' }))}
+                  className="rounded border-input"
+                />
+                <Label htmlFor="edit-is_paid" className="flex items-center gap-1">
+                  <Euro className="w-4 h-4" />
+                  Recurso de pago
+                </Label>
+              </div>
+              {editForm.is_paid && (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0.50"
+                    value={editForm.price_euros}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, price_euros: e.target.value }))}
+                    placeholder="Precio en €"
+                    className="w-32"
+                    required={editForm.is_paid}
+                  />
+                  <span className="text-sm text-muted-foreground">€</span>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit">
+                Guardar cambios
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
