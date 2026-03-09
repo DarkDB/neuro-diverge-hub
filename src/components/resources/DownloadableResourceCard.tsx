@@ -67,6 +67,7 @@ export function DownloadableResourceCard({
   fileUrl,
   downloadCount,
   category,
+  neurodivergenceType,
   isPaid = false,
   priceCents,
   purchasedSessionId,
