@@ -12,6 +12,7 @@ interface DownloadableResourceCardProps {
   fileUrl: string;
   downloadCount?: number;
   category: string;
+  neurodivergenceType?: string | null;
   isPaid?: boolean;
   priceCents?: number;
   purchasedSessionId?: string | null;
