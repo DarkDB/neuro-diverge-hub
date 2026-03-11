@@ -7,18 +7,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Product configuration
-const PRODUCTS = {
-  screening: {
-    price_id: "price_1Ss5fZ2HU8ke0Kv1ErMiub9B", // 4,99€ - Análisis completo cuestionario (PRODUCCIÓN)
-    product_id: "prod_screening_live",
-  },
-  test_premium: {
-    price_id: "price_1Ss5g82HU8ke0Kv1aB1zvLLz", // 0,99€ - Análisis premium test (PRODUCCIÓN)
-    product_id: "prod_test_premium_live",
-  },
-};
-
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CREATE-PAYMENT] ${step}${detailsStr}`);
@@ -40,8 +28,8 @@ serve(async (req) => {
     const { product_type, session_id, test_type } = await req.json();
     logStep("Request body", { product_type, session_id, test_type });
 
-    if (!product_type || !PRODUCTS[product_type as keyof typeof PRODUCTS]) {
-      throw new Error("Invalid product type. Use 'screening' or 'test_premium'");
+    if (!product_type) {
+      throw new Error("product_type is required");
     }
 
     const authHeader = req.headers.get("Authorization");
@@ -52,6 +40,55 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
+
+    // Fetch pricing from database using service role to bypass RLS
+    const serviceClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const { data: pricing, error: pricingError } = await serviceClient
+      .from('product_pricing')
+      .select('*')
+      .eq('product_key', product_type)
+      .eq('is_active', true)
+      .single();
+
+    if (pricingError || !pricing) {
+      throw new Error(`Product '${product_type}' not found or inactive`);
+    }
+    logStep("Pricing fetched", { pricing });
+
+    // If product is free, return success directly without Stripe
+    if (pricing.is_free) {
+      logStep("Product is free, skipping payment");
+      
+      // If it's a screening, mark as paid
+      if (product_type === 'screening' && session_id) {
+        await serviceClient
+          .from('screening_sessions')
+          .update({ paid: true })
+          .eq('id', session_id);
+      }
+
+      const origin = req.headers.get("origin") || "https://espacioneurodivergente.com";
+      let redirectUrl: string;
+      if (product_type === 'test_premium' && test_type) {
+        redirectUrl = `${origin}/tests/${test_type}?payment_success=true&test_type=${test_type}&free=true`;
+      } else {
+        redirectUrl = `${origin}/pago-exitoso?product=${product_type}&free=true`;
+        if (session_id) redirectUrl += `&session_id=${session_id}`;
+      }
+
+      return new Response(JSON.stringify({ url: redirectUrl, free: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    if (!pricing.stripe_price_id) {
+      throw new Error("No Stripe price configured for this product");
+    }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
@@ -65,23 +102,18 @@ serve(async (req) => {
       logStep("Existing customer found", { customerId });
     }
 
-    const selectedProduct = PRODUCTS[product_type as keyof typeof PRODUCTS];
-    
-    // Build metadata for the payment
+    // Build metadata
     const metadata: Record<string, string> = {
       user_id: user.id,
       product_type,
     };
-    
     if (session_id) metadata.session_id = session_id;
     if (test_type) metadata.test_type = test_type;
 
     const origin = req.headers.get("origin") || "https://espacioneurodivergente.com";
     
-    // Determine success URL based on product type
     let successUrl: string;
     if (product_type === 'test_premium' && test_type) {
-      // Redirect back to the test page with payment success params
       successUrl = `${origin}/tests/${test_type}?payment_success=true&test_type=${test_type}`;
     } else {
       successUrl = `${origin}/pago-exitoso?product=${product_type}`;
@@ -93,7 +125,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price: selectedProduct.price_id,
+          price: pricing.stripe_price_id,
           quantity: 1,
         },
       ],

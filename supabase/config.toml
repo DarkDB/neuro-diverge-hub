@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.create-donation]
 verify_jwt = false
+
+[functions.update-pricing]
+verify_jwt = false
