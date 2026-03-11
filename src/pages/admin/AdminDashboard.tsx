@@ -70,7 +70,7 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full max-w-2xl grid-cols-4">
+          <TabsList className="grid w-full max-w-3xl grid-cols-5">
             <TabsTrigger value="articles" className="gap-2">
               <FileText className="w-4 h-4" />
               Artículos
@@ -82,6 +82,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="pricing" className="gap-2">
               <Euro className="w-4 h-4" />
               Precios
+            </TabsTrigger>
+            <TabsTrigger value="users" className="gap-2">
+              <Users className="w-4 h-4" />
+              Usuarios
             </TabsTrigger>
             <TabsTrigger value="stats" className="gap-2">
               <BarChart3 className="w-4 h-4" />
