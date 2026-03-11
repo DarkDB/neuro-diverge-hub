@@ -96,6 +96,10 @@ export default function AdminDashboard() {
             <ResourcesTab />
           </TabsContent>
 
+          <TabsContent value="pricing">
+            <PricingTab />
+          </TabsContent>
+
           <TabsContent value="stats">
             <StatsTab />
           </TabsContent>
