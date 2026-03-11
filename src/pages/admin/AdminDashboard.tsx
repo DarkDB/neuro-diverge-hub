@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { ArticlesTab } from '@/components/admin/ArticlesTab';
 import { ResourcesTab } from '@/components/admin/ResourcesTab';
 import { StatsTab } from '@/components/admin/StatsTab';
+import { PricingTab } from '@/components/admin/PricingTab';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
