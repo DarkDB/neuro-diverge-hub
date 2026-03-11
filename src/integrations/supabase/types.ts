@@ -149,6 +149,45 @@ export type Database = {
         }
         Relationships: []
       }
+      product_pricing: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_free: boolean
+          price_cents: number
+          product_key: string
+          product_name: string
+          stripe_price_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_free?: boolean
+          price_cents?: number
+          product_key: string
+          product_name: string
+          stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_free?: boolean
+          price_cents?: number
+          product_key?: string
+          product_name?: string
+          stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

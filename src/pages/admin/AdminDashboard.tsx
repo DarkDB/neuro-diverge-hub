@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, FileText, Download, BarChart3 } from 'lucide-react';
+import { ArrowLeft, FileText, Download, BarChart3, Euro } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { ArticlesTab } from '@/components/admin/ArticlesTab';
 import { ResourcesTab } from '@/components/admin/ResourcesTab';
 import { StatsTab } from '@/components/admin/StatsTab';
+import { PricingTab } from '@/components/admin/PricingTab';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full max-w-lg grid-cols-3">
+          <TabsList className="grid w-full max-w-2xl grid-cols-4">
             <TabsTrigger value="articles" className="gap-2">
               <FileText className="w-4 h-4" />
               Artículos
@@ -76,6 +77,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="resources" className="gap-2">
               <Download className="w-4 h-4" />
               Recursos
+            </TabsTrigger>
+            <TabsTrigger value="pricing" className="gap-2">
+              <Euro className="w-4 h-4" />
+              Precios
             </TabsTrigger>
             <TabsTrigger value="stats" className="gap-2">
               <BarChart3 className="w-4 h-4" />
@@ -89,6 +94,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="resources">
             <ResourcesTab />
+          </TabsContent>
+
+          <TabsContent value="pricing">
+            <PricingTab />
           </TabsContent>
 
           <TabsContent value="stats">
