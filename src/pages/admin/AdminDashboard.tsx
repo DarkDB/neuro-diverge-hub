@@ -11,6 +11,7 @@ import { ResourcesTab } from '@/components/admin/ResourcesTab';
 import { StatsTab } from '@/components/admin/StatsTab';
 import { PricingTab } from '@/components/admin/PricingTab';
 import { UsersTab } from '@/components/admin/UsersTab';
+import { EmailsTab } from '@/components/admin/EmailsTab';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
