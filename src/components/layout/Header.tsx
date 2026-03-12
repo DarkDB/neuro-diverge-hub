@@ -76,7 +76,7 @@ export function Header() {
                     </Button>
                   </Link>
                 )}
-                <Link to="/auth">
+                <Link to="/mi-cuenta">
                   <Button
                     variant="ghost"
                     size="icon"

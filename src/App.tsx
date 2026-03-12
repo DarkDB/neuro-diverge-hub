@@ -32,6 +32,7 @@ import ArticleView from "./pages/ArticleView";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
 import LandingIG from "./pages/LandingIG";
+import MiCuenta from "./pages/MiCuenta";
 import TDAHAdultosTest from "./pages/tests/TDAHAdultos";
 import TEAAQ10Test from "./pages/tests/TEAAQ10";
 import DislexiaTest from "./pages/tests/Dislexia";
@@ -80,6 +81,7 @@ const App = () => (
               <Route path="/pago-exitoso" element={<PaymentSuccess />} />
               <Route path="/pago-cancelado" element={<PaymentCanceled />} />
               <Route path="/ig" element={<LandingIG />} />
+              <Route path="/mi-cuenta" element={<MiCuenta />} />
               <Route path="/privacidad" element={<Privacidad />} />
               <Route path="/cookies" element={<Cookies />} />
               <Route path="/aviso-legal" element={<AvisoLegal />} />
