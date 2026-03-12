@@ -324,6 +324,7 @@ export type Database = {
           puntuacion: number | null
           test_id: string
           test_name: string
+          user_id: string | null
         }
         Insert: {
           banda?: string | null
@@ -333,6 +334,7 @@ export type Database = {
           puntuacion?: number | null
           test_id: string
           test_name: string
+          user_id?: string | null
         }
         Update: {
           banda?: string | null
@@ -342,8 +344,17 @@ export type Database = {
           puntuacion?: number | null
           test_id?: string
           test_name?: string
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "test_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
