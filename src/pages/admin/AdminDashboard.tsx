@@ -114,6 +114,10 @@ export default function AdminDashboard() {
             <UsersTab />
           </TabsContent>
 
+          <TabsContent value="emails">
+            <EmailsTab />
+          </TabsContent>
+
           <TabsContent value="stats">
             <StatsTab />
           </TabsContent>
