@@ -5,6 +5,7 @@ import { SectionTitle } from '@/components/ui/SectionTitle';
 import { ContentBlock } from '@/components/ui/ContentBlock';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NeurodivergenceResources } from '@/components/resources/NeurodivergenceResources';
 
 export default function TEAPage() {
   return (
@@ -207,6 +208,9 @@ export default function TEAPage() {
               </Button>
             </ContentBlock>
           </section>
+
+          {/* Materiales descargables */}
+          <NeurodivergenceResources neurodivergenceType="tea" label="TEA" />
 
           {/* Nota importante */}
           <ContentBlock variant="warning">

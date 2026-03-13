@@ -5,6 +5,7 @@ import { SectionTitle } from '@/components/ui/SectionTitle';
 import { ContentBlock } from '@/components/ui/ContentBlock';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NeurodivergenceResources } from '@/components/resources/NeurodivergenceResources';
 
 export default function AACCPage() {
   return (
@@ -233,6 +234,9 @@ export default function AACCPage() {
               </Button>
             </ContentBlock>
           </section>
+
+          {/* Materiales descargables */}
+          <NeurodivergenceResources neurodivergenceType="aacc" label="Altas Capacidades" />
 
           {/* Nota importante */}
           <ContentBlock variant="warning">

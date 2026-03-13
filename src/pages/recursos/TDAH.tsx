@@ -5,6 +5,7 @@ import { SectionTitle } from '@/components/ui/SectionTitle';
 import { ContentBlock } from '@/components/ui/ContentBlock';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NeurodivergenceResources } from '@/components/resources/NeurodivergenceResources';
 
 export default function TDAHPage() {
   return (
@@ -206,6 +207,9 @@ export default function TDAHPage() {
               </Button>
             </ContentBlock>
           </section>
+
+          {/* Materiales descargables */}
+          <NeurodivergenceResources neurodivergenceType="tdah" label="TDAH" />
 
           {/* Nota importante */}
           <ContentBlock variant="warning">
