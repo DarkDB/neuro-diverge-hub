@@ -209,6 +209,9 @@ export default function TEAPage() {
             </ContentBlock>
           </section>
 
+          {/* Materiales descargables */}
+          <NeurodivergenceResources neurodivergenceType="tea" label="TEA" />
+
           {/* Nota importante */}
           <ContentBlock variant="warning">
             <div className="flex gap-4">

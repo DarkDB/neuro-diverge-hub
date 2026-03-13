@@ -234,6 +234,9 @@ export default function DislexiaPage() {
             </ContentBlock>
           </section>
 
+          {/* Materiales descargables */}
+          <NeurodivergenceResources neurodivergenceType="dislexia" label="Dislexia" />
+
           {/* Nota importante */}
           <ContentBlock variant="warning">
             <div className="flex gap-4">

@@ -235,6 +235,9 @@ export default function AACCPage() {
             </ContentBlock>
           </section>
 
+          {/* Materiales descargables */}
+          <NeurodivergenceResources neurodivergenceType="aacc" label="Altas Capacidades" />
+
           {/* Nota importante */}
           <ContentBlock variant="warning">
             <div className="flex gap-4">

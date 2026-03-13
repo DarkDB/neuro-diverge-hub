@@ -238,6 +238,9 @@ export default function DispraxiaPage() {
             </ContentBlock>
           </section>
 
+          {/* Materiales descargables */}
+          <NeurodivergenceResources neurodivergenceType="dispraxia" label="Dispraxia" />
+
           {/* Nota importante */}
           <ContentBlock variant="warning">
             <div className="flex gap-4">
