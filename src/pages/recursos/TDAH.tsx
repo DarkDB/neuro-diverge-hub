@@ -208,6 +208,9 @@ export default function TDAHPage() {
             </ContentBlock>
           </section>
 
+          {/* Materiales descargables */}
+          <NeurodivergenceResources neurodivergenceType="tdah" label="TDAH" />
+
           {/* Nota importante */}
           <ContentBlock variant="warning">
             <div className="flex gap-4">
